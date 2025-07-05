@@ -1,138 +1,297 @@
-import type { MetaFunction } from "@remix-run/node";
+import type { ActionFunctionArgs, LinksFunction, LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
+import { json } from "@remix-run/node";
+import { useLoaderData } from "@remix-run/react";
+import React from "react";
+// Removed Clerk imports - now using Supabase authentication only
+import { createSupabaseServerClient } from "~/lib/supabase.server";
+import styles from "~/styles/index-route.css?url";
+import Header from "~/components/ui/Header";
+import Faq from "~/components/ui/question";
+import Footer from "~/components/ui/foot";
+import { ClientOnly } from "~/components/common/ClientOnly";
+import { Hero } from "~/components/ui/demo";
+import { DefaultRoutePreloader } from "~/components/common/RoutePreloader";
+import { calculatePagination } from "~/lib/utils/timeUtils";
+import { serverCache, CacheKeys } from "~/lib/server-cache";
+import { supabasePool } from "~/lib/supabase-pool.server";
+
+const MESSAGES_PER_PAGE = 10;
+
+export const links: LinksFunction = () => [
+  { rel: "stylesheet", href: styles },
+  { rel: "preload", as: "image", href: "/favicon.ico" },
+  { rel: "dns-prefetch", href: "https://supabase.co" },
+  { rel: "dns-prefetch", href: "https://supabase.co" },
+  // 关键路由预加载 - 提升返回首页速度
+  { rel: "prefetch", href: "/chat" },
+  { rel: "prefetch", href: "/game" },
+  { rel: "prefetch", href: "/music" },
+
+  // 预连接关键资源
+  { rel: "preconnect", href: "https://supabase.co" },
+];
 
 export const meta: MetaFunction = () => {
   return [
-    { title: "New Remix App" },
-    { name: "description", content: "Welcome to Remix!" },
-  ];
+        { title: "汪家俊的个人网站" },
+        { name: "description", content: "展示现代Web技术与AI结合的个人网站，使用Remix、React、TypeScript构建" },
+        { property: "og:title", content: "汪家俊的个人网站" },
+        { property: "og:description", content: "一个由AI技术驱动的现代化个人网站" },
+        { name: "twitter:card", content: "summary_large_image" },
+    ];
+};
+
+// Loader function - 使用连接池和服务端缓存，极大提升性能
+export const loader = async (args: LoaderFunctionArgs) => {
+    console.log('[IndexLoader] Starting...');
+    const startTime = Date.now();
+    
+    const { request } = args;
+    const response = new Response();
+    const { supabase } = createSupabaseServerClient({ request, response });
+    
+    // Get current user session from Supabase
+    const { data: { session } } = await supabase.auth.getSession();
+    const userId = session?.user?.id;
+
+    const url = new URL(request.url);
+    const page = parseInt(url.searchParams.get("page") || "1");
+    
+    // 使用工具函数计算分页 (纯算法逻辑已提取)
+    const pagination = calculatePagination(0, MESSAGES_PER_PAGE, page);
+    const { rangeStart, rangeEnd } = pagination;
+
+    try {
+        // 1. 首先尝试从缓存获取消息数据 - 增加缓存时间提升性能
+        const messagesCacheKey = CacheKeys.indexMessages(page);
+        const cachedMessages = await serverCache.getOrSet(
+            messagesCacheKey,
+            async () => {
+                console.log('[IndexLoader] Cache miss for messages, fetching from DB...');
+                // Use the already initialized supabase client
+                
+                const result = await supabase
+                    .from('messages')
+                    .select('*', { count: 'exact' })
+                    .eq('status', 'approved')
+                    .order('created_at', { ascending: false })
+                    .range(rangeStart, rangeEnd);
+                
+                if (result.error) {
+                    console.error('[IndexLoader] Database error:', result.error);
+                    // 返回默认数据而不是抛出错误
+                    return {
+                        messages: [],
+                        count: 0
+                    };
+                }
+                
+                return {
+                    messages: result.data || [],
+                    count: result.count || 0
+                };
+            },
+            5 * 60 * 1000 // 增加到5分钟缓存，提升性能
+        );
+
+        let currentUser = null;
+
+        // 2. 用户信息（从 Supabase session 获取）
+        if (userId && session?.user) {
+            currentUser = {
+                id: session.user.id,
+                email: session.user.email,
+                // Add other user fields as needed
+            };
+        }
+        
+        // 使用工具函数重新计算正确的分页信息 - 添加安全检查
+        const messagesData = cachedMessages || { messages: [], count: 0 };
+        const finalPagination = calculatePagination(messagesData.count, MESSAGES_PER_PAGE, page);
+        const defaultAvatar = "/favicon.ico"; 
+
+        // 记录性能指标
+        const loadTime = Date.now() - startTime;
+        console.log(`[IndexLoader] Completed in ${loadTime}ms, cache stats:`, serverCache.getStats());
+
+        // 更激进的缓存策略 - 进一步提升性能
+        const cacheControl = userId 
+            ? "public, max-age=300, s-maxage=900, stale-while-revalidate=3600" // 登录用户：5分钟本地，15分钟CDN
+            : "public, max-age=600, s-maxage=1800, stale-while-revalidate=7200"; // 未登录用户：10分钟本地，30分钟CDN
+
+        return json({ 
+            messages: messagesData.messages, 
+            totalPages: finalPagination.totalPages, 
+            currentPage: page, 
+            userId, 
+            defaultAvatar,
+            currentUser
+        }, { 
+            headers: {
+                "Cache-Control": cacheControl,
+                "Vary": "Cookie, Authorization",
+                // 添加ETag支持精确缓存
+                "ETag": `"index-${messagesData.count}-${page}-${userId ? 'auth' : 'anon'}-v3"`,
+                // 性能优化headers
+                "X-Content-Type-Options": "nosniff",
+                "X-Frame-Options": "DENY",
+                // 预加载关键资源
+                "Link": "</chat>; rel=prefetch, </game>; rel=prefetch, </music>; rel=prefetch",
+                // 性能指标
+                "Server-Timing": `db;dur=${loadTime};desc="Database Load Time"`,
+            }
+        });
+
+    } catch (error) {
+        console.error("[IndexLoader] Unexpected error:", error);
+        
+        // 尝试从缓存获取备用数据
+        const fallbackData = serverCache.get(CacheKeys.indexMessages(page));
+        
+        if (fallbackData && typeof fallbackData === 'object' && 'count' in fallbackData && 'messages' in fallbackData) {
+            console.log('[IndexLoader] Using fallback cache data');
+            const finalPagination = calculatePagination(typeof fallbackData.count === 'number' ? fallbackData.count : 0, MESSAGES_PER_PAGE, page);
+            
+            return json({ 
+                messages: fallbackData.messages || [],
+                totalPages: finalPagination.totalPages, 
+                currentPage: page, 
+                userId, 
+                defaultAvatar: "/favicon.ico",
+                currentUser: null,
+                warning: "数据可能不是最新的，请稍后刷新"
+            }, { 
+                headers: {
+                    "Cache-Control": "public, max-age=60, s-maxage=120",
+                    "Vary": "Cookie, Authorization",
+                }
+            });
+        }
+        
+        // 极端错误情况的优雅降级
+        return json({ 
+            messages: [], 
+            totalPages: 1, 
+            currentPage: 1, 
+            userId, 
+            defaultAvatar: "/favicon.ico",
+            currentUser: null,
+            error: "服务暂时不可用，请稍后重试"
+        }, { 
+            status: 200, // 仍然返回200，避免错误页面
+            headers: {
+                "Cache-Control": "no-cache, no-store, must-revalidate",
+                "Vary": "Cookie, Authorization",
+            }
+        });
+    }
+};
+
+export const action = async (args: ActionFunctionArgs) => {
+    const { request } = args;
+    const response = new Response();
+    const { supabase, headers } = createSupabaseServerClient({ request, response });
+    
+    // Get current user session from Supabase
+    const { data: { session } } = await supabase.auth.getSession();
+    const userId = session?.user?.id;
+
+    if (!userId) {
+        return json({ error: "请先登录后再发表留言。" }, { status: 401, headers });
+    }
+
+    const formData = await request.formData();
+    const content = formData.get("content") as string;
+
+    if (!content || content.trim().length === 0) {
+        return json({ error: "留言内容不能为空。" }, { status: 400, headers });
+    }
+    
+    // Get user info from Supabase session
+    let username = `User ${userId.substring(0, 8)}`;
+    
+    if (session?.user) {
+        const user = session.user;
+        const userMetadata = user.user_metadata || {};
+        
+        if (userMetadata.full_name) {
+            username = userMetadata.full_name;
+        } else if (userMetadata.name) {
+            username = userMetadata.name;
+        } else if (user.email) {
+            username = user.email.split('@')[0];
+        }
+    }
+
+    // 移除时间限制检查 - 只保留审核机制
+    // 用户可以随时发表留言，留言将进入审核队列
+
+    const { error: insertError } = await supabase
+        .from("messages")
+        .insert({ 
+            user_id: userId.toString(), 
+            username: username, 
+            content: content.trim(), 
+            status: 'pending' 
+        });
+
+    if (insertError) {
+        console.error("[IndexAction] Error inserting message:", insertError);
+        return json({ error: "留言提交失败，请稍后重试。" }, { status: 500, headers });
+    }
+
+    return json({ success: "留言已提交，等待管理员审核！" }, { headers });
 };
 
 export default function Index() {
+  const { messages, userId, defaultAvatar } = useLoaderData<typeof loader>();
+  
   return (
-    <div className="flex h-screen items-center justify-center">
-      <div className="flex flex-col items-center gap-16">
-        <header className="flex flex-col items-center gap-9">
-          <h1 className="leading text-2xl font-bold text-gray-800 dark:text-gray-100">
-            Welcome to <span className="sr-only">Remix</span>
-          </h1>
-          <div className="h-[144px] w-[434px]">
-            <img
-              src="/logo-light.png"
-              alt="Remix"
-              className="block w-full dark:hidden"
-            />
-            <img
-              src="/logo-dark.png"
-              alt="Remix"
-              className="hidden w-full dark:block"
-            />
-          </div>
-        </header>
-        <nav className="flex flex-col items-center justify-center gap-4 rounded-3xl border border-gray-200 p-6 dark:border-gray-700">
-          <p className="leading-6 text-gray-700 dark:text-gray-200">
-            What&apos;s next?
-          </p>
-          <ul>
-            {resources.map(({ href, text, icon }) => (
-              <li key={href}>
-                <a
-                  className="group flex items-center gap-3 self-stretch p-3 leading-normal text-blue-700 hover:underline dark:text-blue-500"
-                  href={href}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  {icon}
-                  {text}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      </div>
+    <div className="font-sans">
+      <DefaultRoutePreloader />
+      <Header />
+      <Hero />
+      <main>
+        {/* Message Board Section */}
+        <section className="py-20 bg-white">
+            <div className="container mx-auto px-6">
+                <div className="text-center mb-16">
+                    <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6">留言板</h2>
+                    <p className="text-xl text-gray-600">
+                        欢迎留下您的想法和建议
+                    </p>
+                </div>
+                <div className="max-w-4xl mx-auto">
+                    <ClientOnly>
+                        {() => {
+                            const LazyHomeMessages = React.lazy(() => 
+                                import("~/components/messages/HomeMessagesClient.client")
+                            );
+                            return (
+                                <React.Suspense fallback={
+                                    <div className="bg-white rounded-3xl shadow-xl border border-purple-100 overflow-hidden p-8 max-w-4xl mx-auto">
+                                        <div className="animate-pulse space-y-4">
+                                            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                                            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                                            <div className="h-32 bg-gray-200 rounded"></div>
+                                        </div>
+                                    </div>
+                                }>
+                                    <LazyHomeMessages 
+                                        messages={messages}
+                                        userId={userId}
+                                        defaultAvatar={defaultAvatar}
+                                    />
+                                </React.Suspense>
+                            );
+                        }}
+                    </ClientOnly>
+                </div>
+            </div>
+        </section>
+      </main>
+      <Faq />
+      <Footer />
     </div>
   );
 }
-
-const resources = [
-  {
-    href: "https://remix.run/start/quickstart",
-    text: "Quick Start (5 min)",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="20"
-        viewBox="0 0 20 20"
-        fill="none"
-        className="stroke-gray-600 group-hover:stroke-current dark:stroke-gray-300"
-      >
-        <path
-          d="M8.51851 12.0741L7.92592 18L15.6296 9.7037L11.4815 7.33333L12.0741 2L4.37036 10.2963L8.51851 12.0741Z"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    ),
-  },
-  {
-    href: "https://remix.run/start/tutorial",
-    text: "Tutorial (30 min)",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="20"
-        viewBox="0 0 20 20"
-        fill="none"
-        className="stroke-gray-600 group-hover:stroke-current dark:stroke-gray-300"
-      >
-        <path
-          d="M4.561 12.749L3.15503 14.1549M3.00811 8.99944H1.01978M3.15503 3.84489L4.561 5.2508M8.3107 1.70923L8.3107 3.69749M13.4655 3.84489L12.0595 5.2508M18.1868 17.0974L16.635 18.6491C16.4636 18.8205 16.1858 18.8205 16.0144 18.6491L13.568 16.2028C13.383 16.0178 13.0784 16.0347 12.915 16.239L11.2697 18.2956C11.047 18.5739 10.6029 18.4847 10.505 18.142L7.85215 8.85711C7.75756 8.52603 8.06365 8.21994 8.39472 8.31453L17.6796 10.9673C18.0223 11.0653 18.1115 11.5094 17.8332 11.7321L15.7766 13.3773C15.5723 13.5408 15.5554 13.8454 15.7404 14.0304L18.1868 16.4767C18.3582 16.6481 18.3582 16.926 18.1868 17.0974Z"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    ),
-  },
-  {
-    href: "https://remix.run/docs",
-    text: "Remix Docs",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="20"
-        viewBox="0 0 20 20"
-        fill="none"
-        className="stroke-gray-600 group-hover:stroke-current dark:stroke-gray-300"
-      >
-        <path
-          d="M9.99981 10.0751V9.99992M17.4688 17.4688C15.889 19.0485 11.2645 16.9853 7.13958 12.8604C3.01467 8.73546 0.951405 4.11091 2.53116 2.53116C4.11091 0.951405 8.73546 3.01467 12.8604 7.13958C16.9853 11.2645 19.0485 15.889 17.4688 17.4688ZM2.53132 17.4688C0.951566 15.8891 3.01483 11.2645 7.13974 7.13963C11.2647 3.01471 15.8892 0.951453 17.469 2.53121C19.0487 4.11096 16.9854 8.73551 12.8605 12.8604C8.73562 16.9853 4.11107 19.0486 2.53132 17.4688Z"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-        />
-      </svg>
-    ),
-  },
-  {
-    href: "https://rmx.as/discord",
-    text: "Join Discord",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="20"
-        viewBox="0 0 24 20"
-        fill="none"
-        className="stroke-gray-600 group-hover:stroke-current dark:stroke-gray-300"
-      >
-        <path
-          d="M15.0686 1.25995L14.5477 1.17423L14.2913 1.63578C14.1754 1.84439 14.0545 2.08275 13.9422 2.31963C12.6461 2.16488 11.3406 2.16505 10.0445 2.32014C9.92822 2.08178 9.80478 1.84975 9.67412 1.62413L9.41449 1.17584L8.90333 1.25995C7.33547 1.51794 5.80717 1.99419 4.37748 2.66939L4.19 2.75793L4.07461 2.93019C1.23864 7.16437 0.46302 11.3053 0.838165 15.3924L0.868838 15.7266L1.13844 15.9264C2.81818 17.1714 4.68053 18.1233 6.68582 18.719L7.18892 18.8684L7.50166 18.4469C7.96179 17.8268 8.36504 17.1824 8.709 16.4944L8.71099 16.4904C10.8645 17.0471 13.128 17.0485 15.2821 16.4947C15.6261 17.1826 16.0293 17.8269 16.4892 18.4469L16.805 18.8725L17.3116 18.717C19.3056 18.105 21.1876 17.1751 22.8559 15.9238L23.1224 15.724L23.1528 15.3923C23.5873 10.6524 22.3579 6.53306 19.8947 2.90714L19.7759 2.73227L19.5833 2.64518C18.1437 1.99439 16.6386 1.51826 15.0686 1.25995ZM16.6074 10.7755L16.6074 10.7756C16.5934 11.6409 16.0212 12.1444 15.4783 12.1444C14.9297 12.1444 14.3493 11.6173 14.3493 10.7877C14.3493 9.94885 14.9378 9.41192 15.4783 9.41192C16.0471 9.41192 16.6209 9.93851 16.6074 10.7755ZM8.49373 12.1444C7.94513 12.1444 7.36471 11.6173 7.36471 10.7877C7.36471 9.94885 7.95323 9.41192 8.49373 9.41192C9.06038 9.41192 9.63892 9.93712 9.6417 10.7815C9.62517 11.6239 9.05462 12.1444 8.49373 12.1444Z"
-          strokeWidth="1.5"
-        />
-      </svg>
-    ),
-  },
-];

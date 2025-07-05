@@ -1,0 +1,70 @@
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css');
+
+/* Loading spinner animation */
+.loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .high-contrast-border {
+    border: 2px solid #000;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .dark .bg-gray-50 {
+    background-color: #1f2937;
+  }
+  
+  .dark .bg-white {
+    background-color: #374151;
+    border-color: #4b5563;
+  }
+  
+  .dark .text-gray-900 {
+    color: #f9fafb;
+  }
+  
+  .dark .text-gray-600 {
+    color: #d1d5db;
+  }
+  
+  .dark .text-gray-700 {
+    color: #e5e7eb;
+  }
+  
+  .dark .border-gray-300 {
+    border-color: #4b5563;
+  }
+  
+  .dark .bg-gray-100 {
+    background-color: #4b5563;
+  }
+  
+  .dark .border-gray-200 {
+    border-color: #374151;
+  }
+} 
