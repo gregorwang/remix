@@ -31,9 +31,17 @@ export const loader = async (args: LoaderFunctionArgs) => {
     const { supabase } = createSupabaseServerClient({ request, response });
     
     // Get current user session from Supabase
-    const { data: { session } } = await supabase.auth.getSession();
-    const userId = session?.user?.id;
-    const userEmail = session?.user?.email;
+    const {
+        data: { user },
+        error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+        throw new Response("无权限访问", { status: 403 });
+    }
+
+    const userId = user.id;
+    const userEmail = user.email;
 
     // 检查是否为管理员 (权限验证是I/O操作)
     if (!isAdmin(userId, userEmail)) {
@@ -64,10 +72,10 @@ export const loader = async (args: LoaderFunctionArgs) => {
 
     // 获取用户信息
     let adminUser = null;
-    if (session?.user) {
+    if (user) {
         adminUser = {
-            id: session.user.id,
-            email: session.user.email,
+            id: user.id,
+            email: user.email,
             // Add other user fields as needed
         };
     }
@@ -98,9 +106,22 @@ export const action = async (args: ActionFunctionArgs) => {
     const { supabase, headers } = createSupabaseServerClient({ request, response });
     
     // Get current user session from Supabase
-    const { data: { session } } = await supabase.auth.getSession();
-    const userId = session?.user?.id;
-    const userEmail = session?.user?.email;
+    const {
+        data: { user },
+        error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+        return json({ error: "无权限执行此操作" }, { 
+            status: 403,
+            headers: {
+                "Cache-Control": "no-cache, no-store, must-revalidate",
+            }
+        });
+    }
+
+    const userId = user.id;
+    const userEmail = user.email;
 
     // 检查是否为管理员 (权限验证是I/O操作)
     if (!isAdmin(userId, userEmail)) {

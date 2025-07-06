@@ -287,7 +287,7 @@ export default function AuthPage() {
             <div className="relative hidden w-0 flex-1 lg:block">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-purple-600 to-cyan-600 opacity-90"></div>
                 <img
-                    alt="现代办公环境"
+                    alt="个人网站"
                     src="https://images.unsplash.com/photo-1497366216548-37526070297c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2069&q=80"
                     className="absolute inset-0 h-full w-full object-cover"
                 />
@@ -295,7 +295,7 @@ export default function AuthPage() {
                     <div className="text-center text-white max-w-md px-8">
                         <h3 className="text-3xl font-bold mb-6">开始您的数字化之旅</h3>
                         <p className="text-xl opacity-90 leading-relaxed">
-                            加入我们的社区，发现无限可能。享受安全、便捷的数字化服务体验。
+                            加入我们的社区，发现无限可能。享受安全、便捷的数字化服务体验。看看我的网站吧！
                         </p>
                     </div>
                 </div>

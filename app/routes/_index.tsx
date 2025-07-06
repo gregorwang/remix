@@ -13,7 +13,7 @@ import { Hero } from "~/components/ui/demo";
 import { DefaultRoutePreloader } from "~/components/common/RoutePreloader";
 import { calculatePagination } from "~/lib/utils/timeUtils";
 import { serverCache, CacheKeys } from "~/lib/server-cache";
-import { supabasePool } from "~/lib/supabase-pool.server";
+import { createClient } from "~/utils/supabase.server";
 
 const MESSAGES_PER_PAGE = 10;
 
@@ -189,29 +189,37 @@ export const loader = async (args: LoaderFunctionArgs) => {
 
 export const action = async (args: ActionFunctionArgs) => {
     const { request } = args;
-    const response = new Response();
-    const { supabase, headers } = createSupabaseServerClient({ request, response });
+    const { supabase, headers } = createClient(request);
     
-    // Get current user session from Supabase
-    const { data: { session } } = await supabase.auth.getSession();
-    const userId = session?.user?.id;
+    // 使用 getUser() 替代 getSession() 以提高安全性
+    const {
+        data: { user },
+        error: userError,
+    } = await supabase.auth.getUser();
 
-    if (!userId) {
-        return json({ error: "请先登录后再发表留言。" }, { status: 401, headers });
+    if (userError || !user) {
+        console.error("[IndexAction] User authentication error:", userError);
+        return json({ error: "请先登录后再发表留言。" }, { 
+            status: 401, 
+            headers: Object.fromEntries(headers.entries())
+        });
     }
 
+    const userId = user.id;
     const formData = await request.formData();
     const content = formData.get("content") as string;
 
     if (!content || content.trim().length === 0) {
-        return json({ error: "留言内容不能为空。" }, { status: 400, headers });
+        return json({ error: "留言内容不能为空。" }, { 
+            status: 400, 
+            headers: Object.fromEntries(headers.entries())
+        });
     }
     
-    // Get user info from Supabase session
+    // 获取用户信息
     let username = `User ${userId.substring(0, 8)}`;
     
-    if (session?.user) {
-        const user = session.user;
+    if (user) {
         const userMetadata = user.user_metadata || {};
         
         if (userMetadata.full_name) {
@@ -223,24 +231,36 @@ export const action = async (args: ActionFunctionArgs) => {
         }
     }
 
-    // 移除时间限制检查 - 只保留审核机制
-    // 用户可以随时发表留言，留言将进入审核队列
+    // 留言数据
+    const messageData = {
+        user_id: userId,
+        username: username,
+        content: content.trim(),
+        status: 'pending' as const
+    };
 
-    const { error: insertError } = await supabase
+    console.log("[IndexAction] Inserting message:", messageData);
+
+    const { error: insertError, data } = await supabase
         .from("messages")
-        .insert({ 
-            user_id: userId.toString(), 
-            username: username, 
-            content: content.trim(), 
-            status: 'pending' 
-        });
+        .insert(messageData)
+        .select();
 
     if (insertError) {
         console.error("[IndexAction] Error inserting message:", insertError);
-        return json({ error: "留言提交失败，请稍后重试。" }, { status: 500, headers });
+        return json({ 
+            error: "留言提交失败，请稍后重试。",
+            details: insertError.message 
+        }, { 
+            status: 500, 
+            headers: Object.fromEntries(headers.entries())
+        });
     }
 
-    return json({ success: "留言已提交，等待管理员审核！" }, { headers });
+    console.log("[IndexAction] Message inserted successfully:", data);
+    return json({ success: "留言已提交，等待管理员审核！" }, { 
+        headers: Object.fromEntries(headers.entries())
+    });
 };
 
 export default function Index() {
@@ -278,8 +298,8 @@ export default function Index() {
                                     </div>
                                 }>
                                     <LazyHomeMessages 
-                                        messages={messages}
-                                        userId={userId}
+                                        messages={Array.isArray(messages) ? messages : []}
+                                        userId={userId ?? null}
                                         defaultAvatar={defaultAvatar}
                                     />
                                 </React.Suspense>

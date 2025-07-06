@@ -22,6 +22,32 @@ interface HomeMessagesClientProps {
     defaultAvatar: string;
 }
 
+/** Toast 组件 */
+function Toast({ type, text, onClose }: { type: 'success' | 'error'; text: string; onClose: () => void }) {
+    return (
+        <div
+            className={`fixed top-6 left-1/2 -translate-x-1/2 z-50 min-w-[220px] max-w-xs px-4 py-3 rounded-xl shadow-lg flex items-start gap-2 animate-fade-in-down
+            ${type === 'success' ? 'bg-green-50 border border-green-200 text-green-700' : 'bg-red-50 border border-red-200 text-red-700'}`}
+        >
+            {type === 'success' ? (
+                <svg className="w-5 h-5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                </svg>
+            ) : (
+                <svg className="w-5 h-5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            )}
+            <span className="text-sm leading-relaxed break-words flex-1">{text}</span>
+            <button onClick={onClose} className="ml-1 p-0.5 rounded hover:bg-black/5">
+                <svg className="w-4 h-4" viewBox="0 0 24 24" stroke="currentColor" fill="none">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+    );
+}
+
 export default function HomeMessagesClient({ messages, userId, defaultAvatar }: HomeMessagesClientProps) {
     const fetcher = useFetcher<typeof action>();
     const { supabase } = useSupabase();
@@ -31,9 +57,24 @@ export default function HomeMessagesClient({ messages, userId, defaultAvatar }: 
     const [message, setMessage] = useState("");
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const [emojiPage, setEmojiPage] = useState(0);
-    
+    const [toast, setToast] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
     const isSubmitting = fetcher.state === "submitting";
 
+    // 统一的提示函数
+    const showToast = (type: 'success' | 'error', text: string) => {
+        setToast({ type, text });
+    };
+
+    // 自动隐藏 toast
+    useEffect(() => {
+        if (toast) {
+            const id = setTimeout(() => setToast(null), 3000);
+            return () => clearTimeout(id);
+        }
+    }, [toast]);
+
+    // 监听数据库变化
     useEffect(() => {
         if (!supabase) return;
         
@@ -51,32 +92,18 @@ export default function HomeMessagesClient({ messages, userId, defaultAvatar }: 
         };
     }, [supabase, revalidator]);
 
-    // 简单有效的弹出提示框处理
+    // 简化的响应处理 - Remix fetcher 处理
     useEffect(() => {
-        // 当提交完成后处理响应
         if (fetcher.state === "idle" && fetcher.data) {
-            const data = fetcher.data;
+            const data = fetcher.data as { success?: string; error?: string };
             
-            console.log('Fetcher data received:', data);
-            
-            try {
-                if (data && typeof data === 'object' && 'success' in data && data.success) {
-                    // 成功提示
-                    const successMessage = typeof data.success === 'string' ? data.success : '留言提交成功';
-                    window.alert("✅ " + successMessage);
-                    // 清空表单
-                    setMessage("");
-                    setShowEmojiPicker(false);
-                    // 重新加载数据
-                    revalidator.revalidate();
-                } else if (data && typeof data === 'object' && 'error' in data && data.error) {
-                    // 错误提示
-                    const errorMessage = typeof data.error === 'string' ? data.error : '提交失败，请重试';
-                    window.alert("❌ " + errorMessage);
-                }
-            } catch (error) {
-                console.error('Error processing fetcher data:', error);
-                window.alert("❌ 处理响应时出错，请重试");
+            if (data.success) {
+                showToast('success', data.success);
+                setMessage('');
+                setShowEmojiPicker(false);
+                revalidator.revalidate();
+            } else if (data.error) {
+                showToast('error', data.error);
             }
         }
     }, [fetcher.state, fetcher.data, revalidator]);
@@ -109,7 +136,6 @@ export default function HomeMessagesClient({ messages, userId, defaultAvatar }: 
     const totalEmojiPages = Math.ceil(EMOJIS.length / EMOJIS_PER_PAGE);
 
     const getUserDisplayName = (msg: Message) => {
-        // 确保返回字符串，避免对象渲染错误
         if (!msg || typeof msg !== 'object') return 'Unknown User';
         
         const username = msg.username;
@@ -126,7 +152,6 @@ export default function HomeMessagesClient({ messages, userId, defaultAvatar }: 
     };
 
     const getUserAvatar = () => {
-        // 确保返回字符串
         if (typeof defaultAvatar === 'string') {
             return defaultAvatar;
         }
@@ -141,7 +166,6 @@ export default function HomeMessagesClient({ messages, userId, defaultAvatar }: 
             const user = session.user;
             const userMetadata = user.user_metadata || {};
             
-            // 确保返回字符串，避免对象渲染
             if (typeof userMetadata.full_name === 'string' && userMetadata.full_name.trim()) {
                 return userMetadata.full_name;
             }
@@ -165,7 +189,6 @@ export default function HomeMessagesClient({ messages, userId, defaultAvatar }: 
 
     // Ensure messages is an array and contains valid message objects
     const messagesArray = Array.isArray(messages) ? messages.filter(msg => {
-        // 确保每个消息都是有效的对象
         if (!msg || typeof msg !== 'object') return false;
         if (!msg.id || !msg.content) return false;
         if (typeof msg.content !== 'string') return false;
@@ -174,6 +197,9 @@ export default function HomeMessagesClient({ messages, userId, defaultAvatar }: 
 
     return (
         <div className="bg-white rounded-3xl shadow-xl border border-purple-100 overflow-hidden p-8 max-w-4xl mx-auto">
+            {/* Toast 提示 */}
+            {toast && <Toast type={toast.type} text={toast.text} onClose={() => setToast(null)} />}
+
             {/* Messages Display */}
             {messagesArray.length > 0 ? (
                 <div className="mb-8">
@@ -239,7 +265,7 @@ export default function HomeMessagesClient({ messages, userId, defaultAvatar }: 
                                 value={message}
                                 onChange={(e) => setMessage(e.target.value)}
                                 className="w-full p-4 border border-gray-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                placeholder="分享您的想法..."
+                                placeholder="AI是个**这里留言提示功能改了几轮都改不明白学习去了一般来说你能看到之前的留言记录在说明留言发送成功等待后续我的审核就能看见留言了"
                                 rows={3}
                                 required
                             />
@@ -322,4 +348,4 @@ export default function HomeMessagesClient({ messages, userId, defaultAvatar }: 
             )}
         </div>
     );
-} 
+}

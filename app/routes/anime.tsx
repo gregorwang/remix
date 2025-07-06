@@ -67,17 +67,17 @@ export async function loader() {
       loading: "加载中..."
     },
     animeList: [
-      { id: 1, name: '从零开始的异世界生活', rating: '9.2', url: null },
+      { id: 1, name: '从零开始的异世界生活', rating: '10.0', url: null },
       { id: 2, name: '火影忍者', rating: '9.5', url: null },
       { id: 3, name: '进击的巨人', rating: '9.8', url: null },
       { id: 4, name: '鬼灭之刃', rating: '9.3', url: null },
-      { id: 5, name: '斩！赤红之瞳', rating: '8.9', url: null },
-      { id: 6, name: '来自多彩世界的明天', rating: '8.7', url: null },
-      { id: 7, name: '擅长作弄的高木同学', rating: '8.5', url: null },
-      { id: 8, name: '一拳超人', rating: '9.1', url: null },
+      { id: 5, name: '斩！赤红之瞳', rating: '9.9', url: null },
+      { id: 6, name: '来自多彩世界的明天', rating: '9.7', url: null },
+      { id: 7, name: '擅长作弄的高木同学', rating: '9.5', url: null },
+      { id: 8, name: '猫和老鼠', rating: '10.0', url: null },
       { id: 9, name: 'Fate系列', rating: '9.0', url: null },
-      { id: 10, name: '钢之炼金术师', rating: '9.7', url: null },
-      { id: 11, name: '樱花庄的宠物女孩', rating: '8.8', url: null }
+      { id: 10, name: '雾山五行', rating: '9.7', url: null },
+      { id: 11, name: '灵笼', rating: '9.8', url: null }
     ],
     videoSrc: "you.mp4"
   };

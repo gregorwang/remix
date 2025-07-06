@@ -15,7 +15,7 @@ import { createBrowserClient } from "@supabase/ssr";
 
 // Removed Clerk imports - now using Supabase only
 
-import { createSupabaseServerClient } from "~/lib/supabase.server";
+import { createClient } from "~/utils/supabase.server";
 import type { Database } from "~/lib/types";
 import tailwindStyles from "./tailwind.css?url";
 
@@ -60,9 +60,15 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   };
 
   // 使用 Supabase 获取 session，并将必要的 Set-Cookie 头返回给 Remix
-  const response = new Response();
-  const { supabase, headers } = createSupabaseServerClient({ request, response });
+  const { supabase, headers } = createClient(request);
 
+  // 使用 getUser() 替代 getSession() 以提高安全性
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  // 如果需要 session 信息，再获取 session
   const {
     data: { session },
   } = await supabase.auth.getSession();
@@ -70,14 +76,10 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   return json({
     env,
     session,
+    user,
+    userError,
   }, {
-    headers: {
-      ...Object.fromEntries(headers.entries()),
-      // 优化根数据缓存
-      "Cache-Control": "public, max-age=300, s-maxage=900, stale-while-revalidate=1800",
-      // 预加载关键DNS
-      "Link": "<https://supabase.co>; rel=dns-prefetch",
-    }
+    headers: Object.fromEntries(headers.entries())
   });
 };
 
