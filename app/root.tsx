@@ -43,9 +43,20 @@ export const links: LinksFunction = () => [
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   // ----- 环境变量和 Supabase 初始化 ----- //
   const { SUPABASE_URL, SUPABASE_ANON_KEY } = process.env;
+  
+  // 环境变量检查
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    throw new Error(
+      `Missing required environment variables:\n` +
+      `SUPABASE_URL: ${SUPABASE_URL ? '✓' : '✗ Missing'}\n` +
+      `SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY ? '✓' : '✗ Missing'}\n` +
+      `Please create a .env file in your project root with these variables.`
+    );
+  }
+
   const env = {
-    SUPABASE_URL: SUPABASE_URL!,
-    SUPABASE_ANON_KEY: SUPABASE_ANON_KEY!,
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY,
   };
 
   // 使用 Supabase 获取 session，并将必要的 Set-Cookie 头返回给 Remix

@@ -60,9 +60,20 @@ class SupabasePool {
       this.evictOldestConnection();
     }
 
+    // 环境变量检查
+    const { SUPABASE_URL, SUPABASE_ANON_KEY } = process.env;
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+      throw new Error(
+        `Missing required environment variables:\n` +
+        `SUPABASE_URL: ${SUPABASE_URL ? '✓' : '✗ Missing'}\n` +
+        `SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY ? '✓' : '✗ Missing'}\n` +
+        `Please create a .env file in your project root with these variables.`
+      );
+    }
+
     const client = createClient<Database>(
-      process.env.SUPABASE_URL!,
-      process.env.SUPABASE_ANON_KEY!,
+      SUPABASE_URL,
+      SUPABASE_ANON_KEY,
       {
         auth: {
           persistSession: false, // 服务端不需要持久化session

@@ -7,7 +7,12 @@ export const loader = async () => {
     const { SUPABASE_URL, SUPABASE_ANON_KEY } = process.env;
 
     if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-        throw new Error("Supabase URL and Anon Key must be provided.");
+        throw new Error(
+            `Missing required environment variables:\n` +
+            `SUPABASE_URL: ${SUPABASE_URL ? '✓' : '✗ Missing'}\n` +
+            `SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY ? '✓' : '✗ Missing'}\n` +
+            `Please create a .env file in your project root with these variables.`
+        );
     }
 
     return json({

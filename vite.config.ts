@@ -15,6 +15,11 @@ export default defineConfig({
   server: {
     port: 3000,
   },
+  define: {
+    // 明确定义哪些环境变量可以在客户端访问
+    'process.env.SUPABASE_URL': JSON.stringify(process.env.SUPABASE_URL),
+    'process.env.SUPABASE_ANON_KEY': JSON.stringify(process.env.SUPABASE_ANON_KEY),
+  },
   build: {
     cssCodeSplit: true,
     rollupOptions: {

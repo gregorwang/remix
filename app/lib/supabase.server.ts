@@ -16,14 +16,25 @@ export const createSupabaseServerClient = ({
   const cookies = parse(request.headers.get("Cookie") ?? "");
   const headers = new Headers();
 
+  // 环境变量检查
+  const { SUPABASE_URL, SUPABASE_ANON_KEY } = process.env;
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    throw new Error(
+      `Missing required environment variables:\n` +
+      `SUPABASE_URL: ${SUPABASE_URL ? '✓' : '✗ Missing'}\n` +
+      `SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY ? '✓' : '✗ Missing'}\n` +
+      `Please create a .env file in your project root with these variables.`
+    );
+  }
+
   // 使用连接池获取客户端，避免重复创建连接
   const pooledClient = supabasePool.getClient('server');
 
   // 为了保持cookie功能，仍需要创建带cookie支持的客户端
   // 但我们可以复用连接配置
   const supabase = createServerClient<Database>(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_ANON_KEY!,
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY,
     {
       cookies: {
         get(key) {
