@@ -1,6 +1,7 @@
 import { createServerClient, parse, serialize } from "@supabase/ssr";
 import { supabasePool } from "./supabase-pool.server";
 import type { Database } from "./types";
+import { createSupabaseFetchConfig } from "./fetch-wrapper.server";
 
 /**
  * 创建高性能的Supabase服务端客户端
@@ -57,15 +58,8 @@ export const createSupabaseServerClient = ({
           eventsPerSecond: -1, // 服务端禁用实时功能提升性能
         },
       },
-      global: {
-        headers: {
-          'Connection': 'keep-alive',
-          'Keep-Alive': 'timeout=30, max=100',
-          // 优化请求头
-          'Accept-Encoding': 'gzip, deflate, br',
-          'Cache-Control': 'no-cache', // 确保数据新鲜度
-        },
-      },
+      // 使用统一的 fetch 配置
+      ...createSupabaseFetchConfig(),
     }
   );
 

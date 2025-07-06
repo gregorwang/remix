@@ -50,9 +50,12 @@ export const loader = async (args: LoaderFunctionArgs) => {
     const response = new Response();
     const { supabase } = createSupabaseServerClient({ request, response });
     
-    // Get current user session from Supabase
-    const { data: { session } } = await supabase.auth.getSession();
-    const userId = session?.user?.id;
+    // 使用 getUser() 替代 getSession() 以提高安全性
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+
+    const userId = user?.id;
 
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get("page") || "1");
@@ -96,11 +99,11 @@ export const loader = async (args: LoaderFunctionArgs) => {
 
         let currentUser = null;
 
-        // 2. 用户信息（从 Supabase session 获取）
-        if (userId && session?.user) {
+        // 2. 用户信息（从 Supabase user 获取）
+        if (userId && user) {
             currentUser = {
-                id: session.user.id,
-                email: session.user.email,
+                id: user.id,
+                email: user.email,
                 // Add other user fields as needed
             };
         }
@@ -113,6 +116,7 @@ export const loader = async (args: LoaderFunctionArgs) => {
         // 记录性能指标
         const loadTime = Date.now() - startTime;
         console.log(`[IndexLoader] Completed in ${loadTime}ms, cache stats:`, serverCache.getStats());
+        console.log(`[IndexLoader] Found ${messagesData.messages.length} messages, total count: ${messagesData.count}`);
 
         // 更激进的缓存策略 - 进一步提升性能
         const cacheControl = userId 

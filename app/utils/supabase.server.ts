@@ -1,5 +1,6 @@
 import { createServerClient, serialize, parse } from "@supabase/ssr";
 import type { Database } from "~/lib/types";
+import { createSupabaseFetchConfig } from "~/lib/fetch-wrapper.server";
 
 export function createClient(request: Request) {
   const cookies = parse(request.headers.get("Cookie") ?? "");
@@ -32,6 +33,7 @@ export function createClient(request: Request) {
           headers.append("Set-Cookie", serialize(key, "", options));
         },
       },
+      ...createSupabaseFetchConfig(),
     },
   );
 

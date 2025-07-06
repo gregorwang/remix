@@ -114,7 +114,9 @@ export function IndexPageOptimizer({ userId }: IndexPageOptimizerProps) {
 
         // 5. 智能内存管理
         const handleMemoryPressure = () => {
-          if (performance.memory && performance.memory.usedJSHeapSize > 50 * 1024 * 1024) {
+          // 使用类型断言处理 performance.memory
+          const perfMemory = (performance as any).memory;
+          if (perfMemory && perfMemory.usedJSHeapSize > 50 * 1024 * 1024) {
             cache.clear();
             console.log('Memory pressure detected, cleared cache');
           }
