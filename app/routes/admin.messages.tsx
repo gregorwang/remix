@@ -57,8 +57,6 @@ export const loader = async (args: LoaderFunctionArgs) => {
         throw new Response("无权限访问", { status: 403 });
     }
 
-    const { headers: supabaseHeaders } = createClient(request);
-
     // 获取所有待审核的留言
     const { data: pendingMessages, error: pendingError } = await supabase
         .from('messages')
@@ -89,10 +87,6 @@ export const loader = async (args: LoaderFunctionArgs) => {
         };
     }
 
-    supabaseHeaders.forEach((value, key) => {
-        response.headers.append(key, value);
-    });
-
     return json({
         pendingMessages: pendingMessages || [],
         recentMessages: recentMessages || [],
@@ -100,7 +94,6 @@ export const loader = async (args: LoaderFunctionArgs) => {
         totalPending: pendingMessages?.length || 0
     }, { 
         headers: {
-            ...Object.fromEntries(response.headers.entries()),
             // 管理页面数据实时性要求高，短缓存
             "Cache-Control": "private, max-age=60, s-maxage=120",
             "Content-Type": "application/json",
@@ -204,14 +197,10 @@ export const action = async (args: ActionFunctionArgs) => {
         }
 
         const actionText = action === 'approve' ? '批准' : action === 'reject' ? '拒绝' : '删除';
-        
-        headers.forEach((value, key) => {
-            response.headers.append(key, value);
-        });
 
         return json({ success: `留言已${actionText}` }, { 
             headers: {
-                ...Object.fromEntries(response.headers.entries()),
+                ...Object.fromEntries(headers.entries()),
                 "Cache-Control": "no-cache, no-store, must-revalidate",
                 "Content-Type": "application/json",
             }

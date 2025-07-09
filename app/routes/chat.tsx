@@ -64,8 +64,8 @@ export async function loader() {
     content: {
       title: "聊天室",
       description: "与我交流想法和观点",
-      welcome_title: "该项目涉及到大量对话集的编写预计2025年12月之前完成敬请期待",
-      welcome_subtitle: "你好我是Nemesis，一个基于qwen大模型微调后的对话助手",
+      welcome_title: "该项目涉及到大量对话集的编写预计2025年10月之前完成敬请期待",
+      welcome_subtitle: "你好我是Nemesis，一个基于RAG技术的对话助手",
       preset_questions: {
         question1: "什么是汪家俊的疯狂自我意识？",
         question2: "为什么这个AI对话角色叫做Nemesis？",

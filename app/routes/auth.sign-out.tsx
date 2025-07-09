@@ -6,17 +6,14 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
   await supabase.auth.signOut();
 
-  // merge headers
-  headers.forEach((value, key) => {
-    response.headers.append(key, value);
-  });
-
   // 登出操作不应该被缓存
-  response.headers.set("Cache-Control", "no-cache, no-store, must-revalidate");
+  headers.set("Cache-Control", "no-cache, no-store, must-revalidate");
+  headers.set("Pragma", "no-cache");
+  headers.set("Expires", "0");
 
   // Redirect to the homepage, ensuring the auth cookie is cleared.
   return redirect("/", {
-    headers: response.headers,
+    headers: Object.fromEntries(headers.entries()),
   });
 };
 

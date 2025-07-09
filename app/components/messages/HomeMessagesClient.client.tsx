@@ -6,6 +6,7 @@ import type { SupabaseOutletContext } from "~/lib/types";
 
 const EMOJIS = ['😀', '😃', '😄', '😁', '😅', '😂', '🤣', '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😚', '😋', '😛', '😝', '😜', '🤪', '🤨', '🧐', '🤓', '😎', '🥸', '🤩', '🥳', '😏', '😒', '😞', '😔', '😟', '😕', '🙁', '☹️', '😣', '😖', '😫', '😩', '🥺', '😢', '😭', '😤', '😠', '😡', '🤬', '🤯', '😳', '🥵', '🥶', '😱', '😨', '😰', '😥', '😓', '🫣', '🤗', '🫡', '🤔', '🫢', '🤭', '🤫', '🤥', '😶', '😐', '😑', '😬', '🫠', '🙄', '😯', '😦', '😧', '😮', '😲', '🥱', '😴', '🤤', '😪', '😵', '🫥', '🤐', '🥴', '🤢', '🤮', '🤧', '😷'];
 const EMOJIS_PER_PAGE = 32;
+const MESSAGES_PER_PAGE = 5; // 每页显示的留言数
 
 interface Message {
     id: string;
@@ -58,6 +59,9 @@ export default function HomeMessagesClient({ messages, userId, defaultAvatar }: 
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const [emojiPage, setEmojiPage] = useState(0);
     const [toast, setToast] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+    // 新增：控制显示的留言数量
+    const [displayedMessagesCount, setDisplayedMessagesCount] = useState(MESSAGES_PER_PAGE);
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
 
     const isSubmitting = fetcher.state === "submitting";
 
@@ -93,20 +97,22 @@ export default function HomeMessagesClient({ messages, userId, defaultAvatar }: 
     }, [supabase, revalidator]);
 
     // 简化的响应处理 - Remix fetcher 处理
-    useEffect(() => {
-        if (fetcher.state === "idle" && fetcher.data) {
-            const data = fetcher.data as { success?: string; error?: string };
-            
-            if (data.success) {
-                showToast('success', data.success);
-                setMessage('');
-                setShowEmojiPicker(false);
-                revalidator.revalidate();
-            } else if (data.error) {
-                showToast('error', data.error);
-            }
-        }
-    }, [fetcher.state, fetcher.data, revalidator]);
+    // useEffect(() => {
+    //     if (fetcher.state === "idle" && fetcher.data) {
+    //         const data = fetcher.data as { success?: string; error?: string };
+    //         
+    //         if (data.success) {
+    //             showToast('success', data.success);
+    //             setMessage('');
+    //             setShowEmojiPicker(false);
+    //             revalidator.revalidate();
+    //             // 重置显示数量，让新留言能够被看到
+    //             setDisplayedMessagesCount(MESSAGES_PER_PAGE);
+    //         } else if (data.error) {
+    //             showToast('error', data.error);
+    //         }
+    //     }
+    // }, [fetcher.state, fetcher.data, revalidator]);
 
     // Close emoji picker when clicking outside
     useEffect(() => {
@@ -195,6 +201,32 @@ export default function HomeMessagesClient({ messages, userId, defaultAvatar }: 
         return true;
     }) : [];
 
+    // 懒加载更多留言
+    const loadMoreMessages = () => {
+        setIsLoadingMore(true);
+        // 模拟加载时间
+        setTimeout(() => {
+            setDisplayedMessagesCount(prev => Math.min(prev + MESSAGES_PER_PAGE, messagesArray.length));
+            setIsLoadingMore(false);
+        }, 300);
+    };
+
+    // 获取当前要显示的留言
+    const displayedMessages = messagesArray.slice(0, displayedMessagesCount);
+    const hasMoreMessages = displayedMessagesCount < messagesArray.length;
+
+    // 新增：表单提交时直接弹窗和清空输入框
+    const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        if (!message.trim()) return;
+        showToast('success', '留言已发送！');
+        setMessage('');
+        setShowEmojiPicker(false);
+        // 这里如果还想让后端收到数据，可以手动提交表单
+        // 但如果只想前端体验，下面这行可以注释掉
+        fetcher.submit(e.currentTarget);
+    };
+
     return (
         <div className="bg-white rounded-3xl shadow-xl border border-purple-100 overflow-hidden p-8 max-w-4xl mx-auto">
             {/* Toast 提示 */}
@@ -204,7 +236,7 @@ export default function HomeMessagesClient({ messages, userId, defaultAvatar }: 
             {messagesArray.length > 0 ? (
                 <div className="mb-8">
                     <div className="space-y-4 max-h-96 overflow-y-auto">
-                        {messagesArray.slice(0, 5).map((msg: Message) => {
+                        {displayedMessages.map((msg: Message) => {
                             const isOwnMessage = msg.user_id === userId?.toString();
                             return (
                                 <div className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`} key={msg.id}>
@@ -229,10 +261,40 @@ export default function HomeMessagesClient({ messages, userId, defaultAvatar }: 
                                 </div>
                             );
                         })}
-                        {messagesArray.length > 5 && (
-                            <div className="text-center">
-                                <p className="text-gray-500 text-sm">
-                                    还有 {messagesArray.length - 5} 条留言...
+                        
+                        {/* 加载更多按钮 */}
+                        {hasMoreMessages && (
+                            <div className="text-center py-4">
+                                <button
+                                    onClick={loadMoreMessages}
+                                    disabled={isLoadingMore}
+                                    className="inline-flex items-center px-4 py-2 text-sm font-medium text-purple-600 bg-purple-50 border border-purple-200 rounded-lg hover:bg-purple-100 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {isLoadingMore ? (
+                                        <>
+                                            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-purple-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                            加载中...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                            加载更多 ({messagesArray.length - displayedMessagesCount} 条)
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                        )}
+                        
+                        {/* 显示总数信息 */}
+                        {messagesArray.length > MESSAGES_PER_PAGE && (
+                            <div className="text-center py-2">
+                                <p className="text-gray-400 text-xs">
+                                    显示 {displayedMessages.length} / {messagesArray.length} 条留言
                                 </p>
                             </div>
                         )}
@@ -253,7 +315,7 @@ export default function HomeMessagesClient({ messages, userId, defaultAvatar }: 
                 </div>
             ) : (
                 <div className="max-w-2xl mx-auto">
-                    <fetcher.Form method="post" className="space-y-4">
+                    <fetcher.Form method="post" className="space-y-4" onSubmit={handleFormSubmit}>
                         {currentUserName && (
                             <p className="text-sm text-gray-500">
                                 已登录为 <span className="font-medium text-purple-600">{currentUserName}</span>
@@ -265,7 +327,7 @@ export default function HomeMessagesClient({ messages, userId, defaultAvatar }: 
                                 value={message}
                                 onChange={(e) => setMessage(e.target.value)}
                                 className="w-full p-4 border border-gray-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                placeholder="AI是个**这里留言提示功能改了几轮都改不明白学习去了一般来说你能看到之前的留言记录在说明留言发送成功等待后续我的审核就能看见留言了"
+                                placeholder="请耐心等待审核"
                                 rows={3}
                                 required
                             />

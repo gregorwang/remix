@@ -10,6 +10,7 @@ import Faq from "~/components/ui/question";
 import Footer from "~/components/ui/foot";
 import { ClientOnly } from "~/components/common/ClientOnly";
 import { Hero } from "~/components/ui/demo";
+// 使用改进后的智能预加载器
 import { DefaultRoutePreloader } from "~/components/common/RoutePreloader";
 import { calculatePagination } from "~/lib/utils/timeUtils";
 import { serverCache, CacheKeys } from "~/lib/server-cache";
@@ -21,12 +22,8 @@ export const links: LinksFunction = () => [
   { rel: "preload", as: "image", href: "/favicon.ico" },
   { rel: "dns-prefetch", href: "https://supabase.co" },
   { rel: "dns-prefetch", href: "https://supabase.co" },
-  // 关键路由预加载 - 提升返回首页速度
-  { rel: "prefetch", href: "/chat" },
-  { rel: "prefetch", href: "/game" },
-  { rel: "prefetch", href: "/music" },
-
-  // 预连接关键资源
+  // 移除立即的路由预加载，改为按需预加载
+  // 只预连接关键资源
   { rel: "preconnect", href: "https://supabase.co" },
 ];
 
@@ -148,8 +145,7 @@ export const loader = async (args: LoaderFunctionArgs) => {
                 // 性能优化headers
                 "X-Content-Type-Options": "nosniff",
                 "X-Frame-Options": "DENY",
-                // 预加载关键资源
-                "Link": "</chat>; rel=prefetch, </game>; rel=prefetch, </music>; rel=prefetch",
+                // 移除立即的路由预加载，避免不必要的请求
                 // 性能指标
                 "Server-Timing": `db;dur=${loadTime};desc="Database Load Time"`,
             }
@@ -295,6 +291,7 @@ export default function Index() {
   
   return (
     <div className="font-sans">
+      {/* 使用改进后的智能预加载器，延迟3秒且只预加载chat路由 */}
       <DefaultRoutePreloader />
       <Header />
       <Hero />

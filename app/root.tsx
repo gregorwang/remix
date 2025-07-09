@@ -33,10 +33,9 @@ export const links: LinksFunction = () => [
   },
   { rel: "dns-prefetch", href: "https://supabase.co" },
   { rel: "preload", as: "style", href: tailwindStyles },
-  // 添加关键路由的预加载
+  // 移除全局路由预加载，改为智能按需预加载（通过RoutePreloader组件控制）
+  // 只保留最常用的chat路由预加载
   { rel: "prefetch", href: "/chat" },
-  { rel: "prefetch", href: "/music" },
-  { rel: "prefetch", href: "/game" },
 ];
 
 // Simplified root loader - using Supabase only
