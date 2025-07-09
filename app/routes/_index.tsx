@@ -48,10 +48,19 @@ export const loader = async (args: LoaderFunctionArgs) => {
     const { request } = args;
     const { supabase } = createClient(request);
     
-    // 使用 getUser() 替代 getSession() 以提高安全性
+    // 先检查会话，避免不必要的 token 刷新尝试
     const {
-        data: { user },
-    } = await supabase.auth.getUser();
+        data: { session }
+    } = await supabase.auth.getSession();
+    
+    let user = null;
+    if (session) {
+        // 只有在有会话时才尝试获取用户信息
+        const {
+            data: { user: authenticatedUser },
+        } = await supabase.auth.getUser();
+        user = authenticatedUser;
+    }
 
     const userId = user?.id;
 
@@ -195,7 +204,21 @@ export const action = async (args: ActionFunctionArgs) => {
     const { request } = args;
     const { supabase, headers } = createClient(request);
     
-    // 使用 getUser() 替代 getSession() 以提高安全性
+    // 先检查会话，避免不必要的 token 刷新尝试
+    const {
+        data: { session },
+        error: sessionError
+    } = await supabase.auth.getSession();
+
+    if (sessionError || !session) {
+        console.error("[IndexAction] Session error:", sessionError);
+        return json({ error: "请先登录后再发表留言。" }, { 
+            status: 401, 
+            headers: Object.fromEntries(headers.entries())
+        });
+    }
+
+    // 有会话时才获取用户信息
     const {
         data: { user },
         error: userError,

@@ -29,7 +29,17 @@ export const loader = async (args: LoaderFunctionArgs) => {
     const { request } = args;
     const { supabase } = createClient(request);
     
-    // Get current user session from Supabase
+    // 先检查会话，避免不必要的 token 刷新尝试
+    const {
+        data: { session },
+        error: sessionError
+    } = await supabase.auth.getSession();
+
+    if (sessionError || !session) {
+        throw new Response("无权限访问", { status: 403 });
+    }
+
+    // 有会话时才获取用户信息
     const {
         data: { user },
         error: userError,
@@ -103,7 +113,22 @@ export const action = async (args: ActionFunctionArgs) => {
     const { request } = args;
     const { supabase, headers } = createClient(request);
     
-    // Get current user session from Supabase
+    // 先检查会话，避免不必要的 token 刷新尝试
+    const {
+        data: { session },
+        error: sessionError
+    } = await supabase.auth.getSession();
+
+    if (sessionError || !session) {
+        return json({ error: "无权限执行此操作" }, { 
+            status: 403,
+            headers: {
+                "Cache-Control": "no-cache, no-store, must-revalidate",
+            }
+        });
+    }
+
+    // 有会话时才获取用户信息
     const {
         data: { user },
         error: userError,

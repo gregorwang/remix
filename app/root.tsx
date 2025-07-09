@@ -62,16 +62,24 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   // 使用 Supabase 获取 session，并将必要的 Set-Cookie 头返回给 Remix
   const { supabase, headers } = createClient(request);
 
-  // 使用 getUser() 替代 getSession() 以提高安全性
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
-  // 如果需要 session 信息，再获取 session
+  // 先检查会话，避免不必要的 token 刷新尝试
   const {
     data: { session },
+    error: sessionError
   } = await supabase.auth.getSession();
+
+  let user = null;
+  let userError = null;
+  
+  if (session && !sessionError) {
+    // 只有在有会话时才尝试获取用户信息
+    const {
+      data: { user: authenticatedUser },
+      error: authUserError,
+    } = await supabase.auth.getUser();
+    user = authenticatedUser;
+    userError = authUserError;
+  }
 
   return json({
     env,
