@@ -3,7 +3,7 @@ import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import React from "react";
 // Removed Clerk imports - now using Supabase authentication only
-import { createSupabaseServerClient } from "~/lib/supabase.server";
+import { createClient } from "~/utils/supabase.server";
 import styles from "~/styles/index-route.css?url";
 import Header from "~/components/ui/Header";
 import Faq from "~/components/ui/question";
@@ -13,7 +13,6 @@ import { Hero } from "~/components/ui/demo";
 import { DefaultRoutePreloader } from "~/components/common/RoutePreloader";
 import { calculatePagination } from "~/lib/utils/timeUtils";
 import { serverCache, CacheKeys } from "~/lib/server-cache";
-import { createClient } from "~/utils/supabase.server";
 
 const MESSAGES_PER_PAGE = 10;
 
@@ -47,8 +46,7 @@ export const loader = async (args: LoaderFunctionArgs) => {
     const startTime = Date.now();
     
     const { request } = args;
-    const response = new Response();
-    const { supabase } = createSupabaseServerClient({ request, response });
+    const { supabase } = createClient(request);
     
     // 使用 getUser() 替代 getSession() 以提高安全性
     const {
@@ -122,6 +120,8 @@ export const loader = async (args: LoaderFunctionArgs) => {
         const cacheControl = userId 
             ? "public, max-age=300, s-maxage=900, stale-while-revalidate=3600" // 登录用户：5分钟本地，15分钟CDN
             : "public, max-age=600, s-maxage=1800, stale-while-revalidate=7200"; // 未登录用户：10分钟本地，30分钟CDN
+
+        console.log("[DEBUG] messages from DB:", messagesData.messages);
 
         return json({ 
             messages: messagesData.messages, 

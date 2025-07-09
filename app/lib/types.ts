@@ -240,29 +240,29 @@ export interface Database {
         Row: {
           id: number;
           user_id: string;
-          username: string;
           content: string;
-          status: 'pending' | 'approved' | 'rejected';
+          status: string;
           created_at: string;
           updated_at: string;
+          username: string;
         };
         Insert: {
           id?: number;
           user_id: string;
-          username: string;
           content: string;
-          status?: 'pending' | 'approved' | 'rejected';
+          status?: string;
           created_at?: string;
           updated_at?: string;
+          username: string;
         };
         Update: {
           id?: number;
           user_id?: string;
-          username?: string;
           content?: string;
-          status?: 'pending' | 'approved' | 'rejected';
+          status?: string;
           created_at?: string;
           updated_at?: string;
+          username?: string;
         };
       };
       profiles: {

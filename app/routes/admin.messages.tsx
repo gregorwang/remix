@@ -2,7 +2,7 @@ import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remi
 import { json, redirect } from "@remix-run/node";
 import { Form, useActionData, useLoaderData, useNavigation } from "@remix-run/react";
 // Removed Clerk imports - now using Supabase authentication only
-import { createSupabaseServerClient } from "~/lib/supabase.server";
+import { createClient } from "~/utils/supabase.server";
 import { isAdmin } from "~/lib/constants";
 import { useState } from "react";
 import AdminErrorBoundary from "~/components/AdminErrorBoundary";
@@ -27,8 +27,7 @@ export function ErrorBoundary() {
 // Loader function - 只做I/O操作，符合Remix规范
 export const loader = async (args: LoaderFunctionArgs) => {
     const { request } = args;
-    const response = new Response();
-    const { supabase } = createSupabaseServerClient({ request, response });
+    const { supabase } = createClient(request);
     
     // Get current user session from Supabase
     const {
@@ -48,7 +47,7 @@ export const loader = async (args: LoaderFunctionArgs) => {
         throw new Response("无权限访问", { status: 403 });
     }
 
-    const { headers: supabaseHeaders } = createSupabaseServerClient({ request, response });
+    const { headers: supabaseHeaders } = createClient(request);
 
     // 获取所有待审核的留言
     const { data: pendingMessages, error: pendingError } = await supabase
@@ -102,8 +101,7 @@ export const loader = async (args: LoaderFunctionArgs) => {
 // Action function - 只做I/O操作，符合Remix规范
 export const action = async (args: ActionFunctionArgs) => {
     const { request } = args;
-    const response = new Response();
-    const { supabase, headers } = createSupabaseServerClient({ request, response });
+    const { supabase, headers } = createClient(request);
     
     // Get current user session from Supabase
     const {

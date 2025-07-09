@@ -1,7 +1,7 @@
 import type { ActionFunctionArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { useFetcher, useSearchParams, Link } from "@remix-run/react";
-import { createSupabaseServerClient } from "~/lib/supabase.server";
+import { createClient } from "~/utils/supabase.server";
 
 export const loader = async () => {
     const { SUPABASE_URL, SUPABASE_ANON_KEY } = process.env;
@@ -28,8 +28,7 @@ export const loader = async () => {
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-    const response = new Response();
-    const { supabase, headers } = createSupabaseServerClient({ request, response });
+    const { supabase, headers } = createClient(request);
     const formData = await request.formData();
     const { intent, email, password } = Object.fromEntries(formData);
     const redirectTo = new URL(request.url).origin;

@@ -1,5 +1,5 @@
 import { redirect } from "@remix-run/node";
-import { createSupabaseServerClient } from "./supabase.server";
+import { createClient } from "../utils/supabase.server";
 
 /**
  * A server-side utility to require a user session.
@@ -9,8 +9,7 @@ import { createSupabaseServerClient } from "./supabase.server";
  * @throws {Response} A redirect response if the user is not authenticated.
  */
 export const requireUser = async (request: Request) => {
-  const response = new Response();
-  const { supabase, headers } = createSupabaseServerClient({ request, response });
+  const { supabase, headers } = createClient(request);
 
   const {
     data: { session },
