@@ -27,6 +27,14 @@ export const loader = async () => {
     });
 };
 
+// 强密码验证函数
+function isPasswordStrong(password: string): boolean {
+    return password.length >= 12 
+        && /[A-Z]/.test(password)  // 包含大写字母
+        && /[a-z]/.test(password)  // 包含小写字母
+        && /[0-9]/.test(password); // 包含数字
+}
+
 export const action = async ({ request }: ActionFunctionArgs) => {
     const { supabase, headers } = createClient(request);
     const formData = await request.formData();
@@ -64,8 +72,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
                     }
                 });
             }
-            if (password.toString().length < 6) {
-                return json({ error: "密码长度至少为6位。" }, { 
+            if (!isPasswordStrong(password.toString())) {
+                return json({ error: "密码必须至少12位,且包含大写字母、小写字母和数字。" }, { 
                     status: 400,
                     headers: {
                         "Cache-Control": "no-cache, no-store, must-revalidate",
@@ -185,7 +193,7 @@ export default function AuthPage() {
                                             type="password"
                                             required
                                             autoComplete={isRegister ? "new-password" : "current-password"}
-                                            placeholder={isRegister ? "创建密码（至少6位）" : "请输入您的密码"}
+                                            placeholder={isRegister ? "创建密码（至少12位，含大小写字母和数字）" : "请输入您的密码"}
                                             className="block w-full rounded-xl border-0 py-3 px-4 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm transition-all duration-200 hover:ring-gray-400"
                                         />
                                         <div className="absolute inset-y-0 right-0 flex items-center pr-3">

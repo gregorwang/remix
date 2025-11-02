@@ -33,8 +33,7 @@ export const links: LinksFunction = () => [
   },
   { rel: "dns-prefetch", href: "https://supabase.co" },
   { rel: "preload", as: "style", href: tailwindStyles },
-  // 移除全局路由预加载，改为智能按需预加载（通过RoutePreloader组件控制）
-  // 只保留最常用的chat路由预加载
+  // 预加载常用路由
   { rel: "prefetch", href: "/chat" },
 ];
 

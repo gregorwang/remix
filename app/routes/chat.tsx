@@ -2,7 +2,6 @@ import type { LinksFunction, MetaFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
 import { useState, useEffect, useRef } from "react";
-import { SubPageRoutePreloader } from "~/components/common/RoutePreloader";
 // Replaced heroicons with simple emoji symbols for better performance
 
 // Types
@@ -223,9 +222,6 @@ export default function ChatPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50">
-      {/* 预加载首页，提升返回速度 */}
-      <SubPageRoutePreloader />
-      
       <div className="flex flex-col min-h-screen bg-[#FAF9F5] font-sans">
         {/* 顶部导航栏 */}
         <header className="py-3 px-4 border-b border-gray-200" style={{ backgroundColor: '#FAF9F5' }}>

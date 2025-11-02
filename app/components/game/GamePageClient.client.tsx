@@ -2,31 +2,12 @@
 
 import { useState, useEffect, useRef, useMemo } from 'react';
 import type { loader } from '~/routes/game';
-import { useImageToken, type ImageData } from '~/hooks/useImageToken';
+import { useImageToken, type ImageData } from '~/hooks/useMediaToken.client';
 import { Link, useLocation } from '@remix-run/react';
 import type { SerializeFrom } from '@remix-run/node';
+import { PlayStationIcon, SwitchIcon, PCIcon } from '~/components/GamePlatformIcons';
 
 type LoaderData = SerializeFrom<typeof loader>;
-
-// --- Icon Components ---
-const PlayStationIcon = () => (
-    <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M8.985 2.596v17.548l3.915 1.261V6.688c0-.69.304-1.151.794-.991.636.181.794.991.794.991v10.516l4.028.69V8.112c0-2.145-1.192-3.123-2.783-3.123-1.591 0-2.783.978-2.783 3.123v-.69c0-.69-.158-1.81-.794-.991-.49.16-.794.301-.794.991V2.596H8.985z" />
-    </svg>
-);
-
-const SwitchIcon = () => (
-    <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M14.176 24h3.674c3.376 0 6.15-2.774 6.15-6.15V6.15C24 2.775 21.226 0 17.85 0H14.176c-.663 0-1.2.538-1.2 1.2v21.6c0 .662.537 1.2 1.2 1.2z" />
-        <path d="M9.824 24H6.15C2.774 24 0 21.226 0 17.85V6.15C0 2.775 2.774 0 6.15 0h3.674c.662 0 1.2.538 1.2 1.2v21.6c0 .662-.538 1.2-1.2 1.2z" />
-    </svg>
-);
-
-const PCIcon = () => (
-    <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M2 12C2 6.48 6.48 2 12 2s10 4.48 10 10-4.48 10-10 10S2 17.52 2 12zm8-5v10l8-5-8-5z" />
-    </svg>
-);
 
 const platformIcons = {
     playstation: PlayStationIcon,
@@ -219,7 +200,7 @@ export default function GamePageClient(data: LoaderData) {
                                                 }`}
                                         >
                                             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                                            {Icon && <Icon />}
+                                            {Icon && <Icon className="w-6 h-6" />}
                                             <span className="font-bold relative z-10">{platform.name}</span>
                                         </Link>
                                     );
@@ -234,7 +215,10 @@ export default function GamePageClient(data: LoaderData) {
                     <div key={platformId} className={`bg-gradient-to-r ${currentPlatformData.gradient} rounded-3xl p-8 shadow-2xl relative overflow-hidden platform-enter-active`}>
                         <div className="absolute inset-0 opacity-10">
                             <div className="absolute top-4 right-4 w-20 h-20 animate-spin-slow">
-                                {platformIcons[currentPlatformData.id as keyof typeof platformIcons] && <div className="w-full h-full">{platformIcons[currentPlatformData.id as keyof typeof platformIcons]()}</div>}
+                                {(() => {
+                                    const IconComponent = platformIcons[currentPlatformData.id as keyof typeof platformIcons];
+                                    return IconComponent ? <div className="w-full h-full"><IconComponent className="w-full h-full" /></div> : null;
+                                })()}
                             </div>
                         </div>
                         <div className="flex flex-col lg:flex-row items-center justify-between relative z-10 space-y-6 lg:space-y-0">

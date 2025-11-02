@@ -3,7 +3,7 @@ import { json } from "@remix-run/node";
 import { useLoaderData, Link } from "@remix-run/react";
 import { useState, useEffect } from "react";
 import { LazyMotion, domAnimation, m } from "framer-motion";
-import { useImageToken, type ImageData } from "~/hooks/useImageToken";
+import { useImageToken, type ImageData } from "~/hooks/useMediaToken.client";
 // Icon components replaced with emoji for better performance
 const CheckCircleIcon = ({ className }: { className?: string }) => (
   <span className={className} role="img" aria-label="check">✅</span>

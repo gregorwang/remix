@@ -70,8 +70,11 @@ export async function action({ request }: ActionFunctionArgs) {
     // 验证过期时间范围（5-60分钟）
     const validExpiresInMinutes = Math.max(5, Math.min(60, parseInt(String(expiresInMinutes))));
 
-    // 配置
-    const secret = process.env.AUTH_KEY_SECRET || '0627'; // 从环境变量获取密钥
+    // 配置 - 安全性: 不提供密钥回退值
+    const secret = process.env.AUTH_KEY_SECRET;
+    if (!secret) {
+      throw new Error('AUTH_KEY_SECRET environment variable is required');
+    }
     const baseUrl = process.env.IMAGE_BASE_URL || 'https://oss.wangjiajun.asia'; // 图片基础URL
     
     // 计算过期时间戳（秒）

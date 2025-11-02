@@ -3,7 +3,7 @@ import { json } from "@remix-run/node";
 import { useLoaderData, Link } from "@remix-run/react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { LazyMotion, domAnimation, m, AnimatePresence } from "framer-motion";
-import { useVideoToken } from "~/hooks/useVideoToken.client";
+import { useVideoToken } from "~/hooks/useMediaToken.client";
 // Replaced heroicons with simple symbols for better performance
 
 // Types

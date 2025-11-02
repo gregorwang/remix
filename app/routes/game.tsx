@@ -13,9 +13,6 @@ import {
   paginateGames 
 } from "~/lib/utils/gameUtils";
 
-// 添加预加载组件
-import { SubPageRoutePreloader } from "~/components/common/RoutePreloader";
-
 // --- Data (moved from Vue component) ---
 const userStats = [
   { label: '游戏总数', value: '156' },
@@ -165,9 +162,6 @@ export default function GameRoute() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-indigo-900 relative overflow-hidden">
-      {/* 预加载首页，提升返回速度 */}
-      <SubPageRoutePreloader />
-      
       {/* Dynamic background particles */}
       <div className="absolute inset-0 overflow-hidden">
         {Array.from({ length: 50 }).map((_, i) => (

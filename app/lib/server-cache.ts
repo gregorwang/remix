@@ -27,6 +27,14 @@ class ServerCache {
   };
   private readonly maxSize = 1000; // 最大缓存项数量
   private readonly defaultTTL = 5 * 60 * 1000; // 默认5分钟TTL
+  
+  // 内存管理配置
+  private readonly MEMORY_THRESHOLD_PERCENT = 0.8; // 80% 堆内存使用率阈值
+  private readonly MIN_MEMORY_THRESHOLD_MB = 50; // 最小阈值 50MB
+  private readonly MAX_MEMORY_THRESHOLD_MB = 512; // 最大阈值 512MB
+  private readonly EVICTION_PERCENT = 0.15; // 每次驱逐 15% 的缓存项
+  private lastEvictionTime = 0; // 上次驱逐时间
+  private readonly EVICTION_COOLDOWN = 60 * 1000; // 驱逐冷却时间 1分钟
 
   private constructor() {
     // 定期清理过期缓存
@@ -163,49 +171,79 @@ class ServerCache {
 
   /**
    * LRU驱逐（最少使用）
+   * @param count 要驱逐的项数量，如果不指定则只驱逐1项
    */
-  private evictLRU(): void {
-    let lruKey: string | null = null;
-    let lruHitCount = Infinity;
-    let lruTimestamp = Date.now();
+  private evictLRU(count?: number): void {
+    const itemsToEvict = count || 1;
+    const evictedKeys: string[] = [];
     
-    for (const [key, item] of this.cache.entries()) {
-      // 优先驱逐命中次数少且时间久的项
-      if (item.hitCount < lruHitCount || 
-          (item.hitCount === lruHitCount && item.timestamp < lruTimestamp)) {
-        lruKey = key;
-        lruHitCount = item.hitCount;
-        lruTimestamp = item.timestamp;
+    // 创建按LRU优先级排序的项列表
+    const items = Array.from(this.cache.entries()).map(([key, item]) => ({
+      key,
+      hitCount: item.hitCount,
+      timestamp: item.timestamp,
+    }));
+    
+    // 排序：优先驱逐命中次数少且时间久的项
+    items.sort((a, b) => {
+      if (a.hitCount !== b.hitCount) {
+        return a.hitCount - b.hitCount;
       }
+      return a.timestamp - b.timestamp;
+    });
+    
+    // 驱逐最不常用的项
+    for (let i = 0; i < Math.min(itemsToEvict, items.length); i++) {
+      const key = items[i].key;
+      this.cache.delete(key);
+      evictedKeys.push(key);
     }
     
-    if (lruKey) {
-      this.cache.delete(lruKey);
-      console.log(`[ServerCache] Evicted LRU item: ${lruKey}`);
+    if (evictedKeys.length > 0) {
+      console.log(`[ServerCache] Evicted ${evictedKeys.length} LRU item(s): ${evictedKeys.slice(0, 5).join(', ')}${evictedKeys.length > 5 ? '...' : ''}`);
     }
   }
 
   /**
    * 内存压力检查
+   * 使用自适应阈值和渐进式LRU驱逐策略
    */
   private memoryPressureCheck(): void {
     if (typeof process === 'undefined' || !process.memoryUsage) return;
     
     const usage = process.memoryUsage();
     const heapUsedMB = usage.heapUsed / 1024 / 1024;
+    const heapTotalMB = usage.heapTotal / 1024 / 1024;
     
-    // 如果堆内存使用超过100MB，清理一半缓存
-    if (heapUsedMB > 100) {
-      const itemsToDelete = Math.floor(this.cache.size / 2);
-      let deleted = 0;
+    // 计算自适应阈值
+    // 使用堆内存总量的百分比，但限制在最小和最大阈值之间
+    const thresholdMB = Math.max(
+      this.MIN_MEMORY_THRESHOLD_MB,
+      Math.min(
+        this.MAX_MEMORY_THRESHOLD_MB,
+        heapTotalMB * this.MEMORY_THRESHOLD_PERCENT
+      )
+    );
+    
+    // 检查是否超过阈值
+    if (heapUsedMB > thresholdMB) {
+      const now = Date.now();
       
-      for (const key of this.cache.keys()) {
-        if (deleted >= itemsToDelete) break;
-        this.cache.delete(key);
-        deleted++;
+      // 检查冷却时间，避免频繁大量删除
+      if (now - this.lastEvictionTime < this.EVICTION_COOLDOWN) {
+        console.log(`[ServerCache] Memory pressure detected (${heapUsedMB.toFixed(2)}MB / ${heapTotalMB.toFixed(2)}MB, threshold: ${thresholdMB.toFixed(2)}MB), but in cooldown period`);
+        return;
       }
       
-      console.log(`[ServerCache] Memory pressure detected (${heapUsedMB.toFixed(2)}MB), cleared ${deleted} items`);
+      // 计算需要驱逐的项数量（15%的缓存项）
+      const itemsToEvict = Math.max(1, Math.floor(this.cache.size * this.EVICTION_PERCENT));
+      
+      // 使用LRU策略驱逐缓存项
+      this.evictLRU(itemsToEvict);
+      
+      this.lastEvictionTime = now;
+      
+      console.log(`[ServerCache] Memory pressure detected (${heapUsedMB.toFixed(2)}MB / ${heapTotalMB.toFixed(2)}MB, threshold: ${thresholdMB.toFixed(2)}MB), evicted ${itemsToEvict} items`);
     }
   }
 

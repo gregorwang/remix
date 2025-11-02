@@ -10,8 +10,6 @@ import Faq from "~/components/ui/question";
 import Footer from "~/components/ui/foot";
 import { ClientOnly } from "~/components/common/ClientOnly";
 import { Hero } from "~/components/ui/demo";
-// 使用改进后的智能预加载器
-import { DefaultRoutePreloader } from "~/components/common/RoutePreloader";
 import { calculatePagination } from "~/lib/utils/timeUtils";
 import { serverCache, CacheKeys } from "~/lib/server-cache";
 
@@ -291,8 +289,6 @@ export default function Index() {
   
   return (
     <div className="font-sans">
-      {/* 使用改进后的智能预加载器，延迟3秒且只预加载chat路由 */}
-      <DefaultRoutePreloader />
       <Header />
       <Hero />
       <main>

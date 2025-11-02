@@ -2,8 +2,7 @@ import type { LoaderFunctionArgs, LinksFunction, MetaFunction } from "@remix-run
 import { json } from "@remix-run/node";
 import { useLoaderData, Link } from "@remix-run/react";
 import { useState, useEffect } from "react";
-import { useImageToken } from "~/hooks/useImageToken";
-import { useVideoToken } from "~/hooks/useVideoToken.client";
+import { useImageToken, useVideoToken } from "~/hooks/useMediaToken.client";
 
 // Types for demo data
 interface MediaDemoData {

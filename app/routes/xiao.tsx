@@ -3,7 +3,7 @@ import { json } from "@remix-run/node";
 import { useLoaderData, Link } from "@remix-run/react";
 import { useState, useEffect } from "react";
 import { LazyMotion, domAnimation, m } from "framer-motion";
-import { useImageToken, type ImageData } from "~/hooks/useImageToken";
+import { useImageToken, type ImageData } from "~/hooks/useMediaToken.client";
 
 // Types
 interface XiaoPageData {

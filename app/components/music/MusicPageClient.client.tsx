@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useImageToken } from '~/hooks/useImageToken';
-import type { ImageData } from '~/hooks/useImageToken';
+import { useImageToken, type ImageData } from '~/hooks/useMediaToken.client';
 import { useMusicAnimations } from '~/hooks/useMusicAnimations.client';
 import type { loader } from '~/routes/music';
 import type { SerializeFrom } from '@remix-run/node';

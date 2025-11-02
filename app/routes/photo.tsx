@@ -3,7 +3,7 @@ import { json } from "@remix-run/node";
 import { useLoaderData, Link } from "@remix-run/react";
 import { useState, useEffect } from "react";
 import { LazyMotion, domAnimation, m } from "framer-motion";
-import { useImageToken } from "~/hooks/useImageToken.client";
+import { useImageToken } from "~/hooks/useMediaToken.client";
 import { ClientOnly } from "~/components/common/ClientOnly";
 
 // Types for photo gallery data

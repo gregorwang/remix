@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import type { LinksFunction } from '@remix-run/node';
 import stylesheet from '~/styles/music.css?url';
-import { useImageToken } from '~/hooks/useImageToken';
-import type { ImageData } from '~/hooks/useImageToken';
+import { useImageToken, type ImageData } from '~/hooks/useMediaToken.client';
 
 export const links: LinksFunction = () => [
   { rel: 'stylesheet', href: stylesheet },

@@ -3,7 +3,6 @@ import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { Suspense, lazy } from "react";
 import musicStyles from "~/styles/music.css?url";
-import { SubPageRoutePreloader } from "~/components/common/RoutePreloader";
 
 const MusicPageClient = lazy(() => import('~/components/music/MusicPageClient.client'));
 
@@ -94,9 +93,6 @@ export default function Music() {
 
   return (
     <div>
-      {/* 预加载首页，提升返回速度 */}
-      <SubPageRoutePreloader />
-      
       <Suspense fallback={
         <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
           <div className="text-white text-xl">Loading Music Page...</div>

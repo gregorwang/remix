@@ -1,39 +1,72 @@
-# Remix 项目治理清单与自动化护栏（深度版）
+2. RoutePreloader.tsx (173 行)
+过度设计表现:
 
-## 1. 代码审计清单（深度版）
+配置参数过多:
+interface RoutePreloaderProps {
+  routes?: string[];           // 1
+  priority?: 'high' | 'low';   // 2
+  preloadIndexData?: boolean;  // 3
+  delay?: number;              // 4
+  enableErrorHandling?: boolean; // 5
+}
+5 个参数 = 2^5 = 32 种可能的组合! 太复杂了!
 
-> **建议：**  
-> 每两周进行一次「架构盘点」会议，将下列表格打印出来，逐项打  / 。如发现 ，立即开 issue 跟进。
+手动创建 Link 元素:
+// Line 31-50: 手动操作 DOM
+const link = document.createElement('link');
+link.rel = 'prefetch';
+link.href = route;
+document.head.appendChild(link);
+但 Remix 已经提供了:
 
-| 维度         | 检查点                                                                                                                                                                                                  | 典型工具 / 方法                        |
-|--------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------|
-| 路由结构     | 1. 所有动态段都用 `$param.tsx` 而不是 `:param` 或模糊 catch-all<br>2. 嵌套路由层级 ≤ 3                                                                           | `remix routes` CLI 输出 / 目测        |
-| 数据加载     | 1. `loader` / `action` 只做 I/O，不做纯算法<br>2. 每个 `loader` 都有显式 `json({…}, { headers })`，利用浏览器缓存                                                  | CodeQL / AST grep                     |
-| 组件设计     | 1. `useLoaderData` 不下穿两层以上<br>2. 使用 `<Suspense>` / `defer()` 时有 fallback UI                                                                             | Storybook / eslint-plugin-remix        |
-| 资源预取     | 1. `<Link prefetch="intent">` 存在且仅在首层导航使用<br>2. 路由组件内无多余 `prefetch`，避免浪费带宽                                                              | Playwright hover 测试                  |
-| 可访问性     | 1. 所有交互元素 `role`、`aria-*` 完整<br>2. 颜色对比度 ≥ 4.5:1                                                                                                  | axe DevTools / jest-axe                |
-| 性能预算     | 1. 首次 JS payload ≤ 150 kB gzip<br>2. `Largest Contentful Paint` ≤ 2.5 s (95th percentile)                                                                      | Lighthouse-CI                          |
-| 安全         | 1. `action`/`loader` 严格校验用户输入（zod, yup）<br>2. 无 `any` 绕过 TS 类型                                                                                    | eslint-plugin-security                 |
-| 依赖治理     | 1. 仅在 `root.tsx` 引入 polyfill<br>2. 没有「只用 1 个函数」却引入整包（lodash-es → lodash.pick）                                                                 | `import-cost`, `webpack-bundle-analyzer`|
-| 错误边界     | 1. 每个路由文件都有 `ErrorBoundary` 导出<br>2. `Boundary` 内部日志上报（Sentry 等）                                                                               | grep `'export function ErrorBoundary'` |
-| 文档 & ADR   | 1. `docs/adr-XXXX-*.md` 跟随改动更新<br>2. Readme 中更新时间 < 14 d                                                                                              | md-lint                                |
-Remix `loader` 是否只做数据，不做业务逻辑？  
-- [ ] `<Link prefetch="intent">` 是否仍在？  
-- [ ] 路由拆分是否引入了重复 bundle？  
-- [ ] 依赖树里有无只为一个小函数而引入的大库？  
+<Link to="/chat" prefetch="intent" /> // 鼠标悬停时预加载
+<Link to="/game" prefetch="render" /> // 渲染时预加载
+为什么 Remix 的方案更好:
 
-> **落地建议**  
-> - 将这些检查项写成 GitHub Issue 模板或 Notion CheckList，每轮审计复用。
+框架知道路由系统,预加载更精准
+自动处理错误
+不需要手动操作 DOM
+简化建议: 删除 RoutePreloader,在 Header 组件的导航链接上添加 prefetch="intent"
 
----
+3. useImageToken Hook (451 行!)
+过度设计的功能:
 
-## 2. 自动化护栏（Guardrails）
+sessionStorage 持久化 (Line 32-86)
 
-### 2.1 Lint / Type / Test 三板斧
+实现了手动缓存保存/恢复
+但浏览器已经会缓存 HTTP 响应!
+去重请求 Map (Line 166-243)
 
-#### 1. ESLint + TypeScript
+防止同时请求相同 token
+但可以用简单的 Promise 缓存
+错误计数器 (Line 132-148)
 
-安装依赖：
+跟踪每个图片的错误次数
+但 3 次重试逻辑可以更简单实现
+Intersection Observer 集成 (Line 344-397)
 
-```bash
-pnpm add -D eslint @typescript-eslint/parser @typescript-eslint/eslint-plugin eslint-plugin-remix
+混合了懒加载逻辑
+应该拆分到独立 Hook
+451 行可以缩减到多少? 估计 150-200 行,通过:
+
+移除 sessionStorage 逻辑(用 HTTP 缓存)
+简化错误处理
+拆分 Intersection Observer 到 useLazyLoad Hook
+4. 服务端缓存内存管理 (server-cache.ts)
+问题代码 (Line 191-210):
+
+if (heapUsedMB > 100) {
+  const itemsToDelete = Math.floor(this.cache.size / 2);
+  let deleted = 0;
+  
+  for (const key of this.cache.keys()) {
+    if (deleted >= itemsToDelete) break;
+    this.cache.delete(key);
+    deleted++;
+  }
+}
+问题:
+
+固定 100MB 阈值 - 但服务器内存可能是 512MB 或 8GB
+删除顺序是任意的,不是 LRU (最少使用)
+一次删除 50% 太激
