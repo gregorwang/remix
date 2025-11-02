@@ -1,6 +1,6 @@
 import type { ActionFunctionArgs, LinksFunction, LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import { useLoaderData, useRouteError, isRouteErrorResponse } from "@remix-run/react";
 import React from "react";
 // Removed Clerk imports - now using Supabase authentication only
 import { createClient } from "~/utils/supabase.server";
@@ -96,7 +96,7 @@ export const loader = async (args: LoaderFunctionArgs) => {
                     count: result.count || 0
                 };
             },
-            5 * 60 * 1000 // 增加到5分钟缓存，提升性能
+            2 * 60 * 1000 // 2分钟缓存，在性能和新鲜度之间平衡
         );
 
         let currentUser = null;
@@ -283,6 +283,72 @@ export const action = async (args: ActionFunctionArgs) => {
         headers: Object.fromEntries(headers.entries())
     });
 };
+
+export function ErrorBoundary() {
+  const error = useRouteError();
+  
+  // 友好错误显示
+  if (isRouteErrorResponse(error)) {
+    return (
+      <div className="font-sans min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center p-8 max-w-md">
+          <div className="mb-6">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
+              <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">
+              {error.status === 404 ? '页面未找到' : '出现错误'}
+            </h2>
+            <p className="text-gray-600 mb-6">
+              {error.status === 404 
+                ? '抱歉，您访问的页面不存在。' 
+                : `错误代码: ${error.status || 500}`}
+            </p>
+            <button
+              onClick={() => window.location.href = '/'}
+              className="inline-block bg-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-purple-700 transition-colors"
+            >
+              返回首页
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 未知错误
+  return (
+    <div className="font-sans min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="text-center p-8 max-w-md">
+        <div className="mb-6">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
+            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">出现错误</h2>
+          <p className="text-gray-600 mb-6">
+            留言板加载失败，请稍后重试。
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="inline-block bg-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-purple-700 transition-colors mr-4"
+          >
+            刷新页面
+          </button>
+          <button
+            onClick={() => window.location.href = '/'}
+            className="inline-block bg-gray-200 text-gray-800 px-6 py-3 rounded-lg font-medium hover:bg-gray-300 transition-colors"
+          >
+            返回首页
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function Index() {
   const { messages, userId, defaultAvatar } = useLoaderData<typeof loader>();

@@ -4,6 +4,7 @@ import { Form, useActionData, useLoaderData, useNavigation } from "@remix-run/re
 // Removed Clerk imports - now using Supabase authentication only
 import { createClient } from "~/utils/supabase.server";
 import { isAdmin } from "~/lib/constants";
+import { serverCache } from "~/lib/server-cache";
 import { useState } from "react";
 import AdminErrorBoundary from "~/components/AdminErrorBoundary";
 
@@ -194,6 +195,16 @@ export const action = async (args: ActionFunctionArgs) => {
                     "Cache-Control": "no-cache, no-store, must-revalidate",
                 }
             });
+        }
+
+        // 清除首页消息缓存，确保审核通过的留言立即显示
+        if (action === 'approve' || action === 'delete') {
+            try {
+                serverCache.deletePattern('index:messages:.*');
+                console.log('[AdminMessages] Cleared index messages cache after', action);
+            } catch (error) {
+                console.error('[AdminMessages] Failed to clear cache:', error);
+            }
         }
 
         const actionText = action === 'approve' ? '批准' : action === 'reject' ? '拒绝' : '删除';

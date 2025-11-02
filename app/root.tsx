@@ -113,10 +113,14 @@ function App() {
   const { env, session } = loaderData;
   const revalidator = useRevalidator();
 
+  // 提取原始值作为依赖，避免env对象引用变化导致重新创建
+  const supabaseUrl = env.SUPABASE_URL;
+  const supabaseKey = env.SUPABASE_ANON_KEY;
+
   // 使用useMemo优化Supabase客户端创建
   const supabase = useMemo(() =>
-    createBrowserClient<Database>(env.SUPABASE_URL, env.SUPABASE_ANON_KEY),
-    [env.SUPABASE_URL, env.SUPABASE_ANON_KEY]
+    createBrowserClient<Database>(supabaseUrl, supabaseKey),
+    [supabaseUrl, supabaseKey]
   );
   
   const serverAccessToken = session?.access_token;

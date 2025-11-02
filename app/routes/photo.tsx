@@ -175,38 +175,61 @@ const OptimizedImage = ({
 }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
-  const [currentSrc, setCurrentSrc] = useState(src);
+  const [isTokenReady, setIsTokenReady] = useState(false);
+  const [currentSrc, setCurrentSrc] = useState<string>("");
   const { getImageWithToken, handleImageError } = useImageToken();
-
-  // 处理token获取 - 只对非本地图片处理
-  useEffect(() => {
-    if (src && !src.startsWith('/') && !src.includes('token=')) {
-      console.log('🔄 开始获取图片token:', src);
-      getImageWithToken(src)
-        .then((tokenUrl) => {
-          console.log('✅ 获取token成功:', src, '->', tokenUrl);
-          setCurrentSrc(tokenUrl);
-        })
-        .catch((error) => {
-          console.error('❌ 获取token失败:', src, error);
-          setCurrentSrc(src);
-        });
-    }
-  }, [src, getImageWithToken]);
 
   const placeholderSrc = "data:image/svg+xml,%3csvg width='400' height='300' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='%23f3f4f6'/%3e%3ctext x='50%25' y='50%25' font-family='system-ui,sans-serif' font-size='16' fill='%23a3a3a3' text-anchor='middle' dy='.3em'%3e加载中...%3c/text%3e%3c/svg%3e";
 
+  // 处理token获取 - 避免初始渲染时使用相对路径导致404
+  useEffect(() => {
+    // 判断是否需要获取token：相对路径且不包含token
+    const needsToken = src && !src.startsWith('/') && !src.startsWith('http') && !src.includes('token=');
+    
+    // 如果不需要token（已经是完整URL或包含token），直接使用
+    if (!needsToken) {
+      setCurrentSrc(src);
+      setIsTokenReady(true);
+      return;
+    }
+
+    // 需要token的情况，先使用占位符，获取token后再更新
+    setCurrentSrc(placeholderSrc);
+    setIsTokenReady(false);
+    
+    console.log('🔄 开始获取图片token:', src);
+    getImageWithToken(src)
+      .then((tokenUrl) => {
+        console.log('✅ 获取token成功:', src, '->', tokenUrl);
+        setCurrentSrc(tokenUrl);
+        setIsTokenReady(true);
+      })
+      .catch((error) => {
+        console.error('❌ 获取token失败:', src, error);
+        // 即使失败也不要使用原始相对路径，继续使用占位符
+        setHasError(true);
+      });
+  }, [src, getImageWithToken]);
+
+  // 计算实际使用的src
+  const finalSrc = hasError ? placeholderSrc : (isTokenReady ? currentSrc : placeholderSrc);
+
   return (
     <img
-      src={hasError ? placeholderSrc : currentSrc}
+      src={finalSrc}
       alt={alt}
       className={`transition-opacity duration-300 ${
-        imageLoaded && !hasError ? 'opacity-100' : 'opacity-0'
+        imageLoaded && !hasError && isTokenReady ? 'opacity-100' : 'opacity-0'
       } ${className || ''}`}
       loading={loading}
-      onLoad={() => setImageLoaded(true)}
+      onLoad={() => {
+        if (isTokenReady) {
+          setImageLoaded(true);
+        }
+      }}
       onError={(e) => {
         setHasError(true);
+        setImageLoaded(false);
         if (imageId) {
           handleImageError(e, imageId);
         }

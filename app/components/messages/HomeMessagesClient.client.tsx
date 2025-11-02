@@ -6,7 +6,7 @@ import type { SupabaseOutletContext } from "~/lib/types";
 
 const EMOJIS = ['😀', '😃', '😄', '😁', '😅', '😂', '🤣', '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😚', '😋', '😛', '😝', '😜', '🤪', '🤨', '🧐', '🤓', '😎', '🥸', '🤩', '🥳', '😏', '😒', '😞', '😔', '😟', '😕', '🙁', '☹️', '😣', '😖', '😫', '😩', '🥺', '😢', '😭', '😤', '😠', '😡', '🤬', '🤯', '😳', '🥵', '🥶', '😱', '😨', '😰', '😥', '😓', '🫣', '🤗', '🫡', '🤔', '🫢', '🤭', '🤫', '🤥', '😶', '😐', '😑', '😬', '🫠', '🙄', '😯', '😦', '😧', '😮', '😲', '🥱', '😴', '🤤', '😪', '😵', '🫥', '🤐', '🥴', '🤢', '🤮', '🤧', '😷'];
 const EMOJIS_PER_PAGE = 32;
-const MESSAGES_PER_PAGE = 5; // 每页显示的留言数
+const MESSAGES_PER_PAGE = 10; // 每页显示的留言数，与后端保持一致
 
 interface Message {
     id: string;
@@ -78,41 +78,58 @@ export default function HomeMessagesClient({ messages, userId, defaultAvatar }: 
         }
     }, [toast]);
 
-    // 监听数据库变化
+    // 监听数据库变化 - 使用防抖优化性能
     useEffect(() => {
         if (!supabase) return;
         
+        // 防抖函数，2秒内只执行一次
+        let debounceTimer: NodeJS.Timeout | null = null;
+        const debouncedRevalidate = () => {
+            if (debounceTimer) {
+                clearTimeout(debounceTimer);
+            }
+            debounceTimer = setTimeout(() => {
+                revalidator.revalidate();
+            }, 2000);
+        };
+        
         const channel = supabase
             .channel('messages-channel')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'messages', filter: 'status=eq.approved' },
-                () => {
-                    revalidator.revalidate();
-                }
+            .on('postgres_changes', { 
+                event: 'INSERT',  // 只监听新增事件，减少不必要触发
+                schema: 'public', 
+                table: 'messages', 
+                filter: 'status=eq.approved' 
+            },
+                debouncedRevalidate
             )
             .subscribe();
 
         return () => {
+            if (debounceTimer) {
+                clearTimeout(debounceTimer);
+            }
             supabase.removeChannel(channel);
         };
     }, [supabase, revalidator]);
 
-    // 简化的响应处理 - Remix fetcher 处理
-    // useEffect(() => {
-    //     if (fetcher.state === "idle" && fetcher.data) {
-    //         const data = fetcher.data as { success?: string; error?: string };
-    //         
-    //         if (data.success) {
-    //             showToast('success', data.success);
-    //             setMessage('');
-    //             setShowEmojiPicker(false);
-    //             revalidator.revalidate();
-    //             // 重置显示数量，让新留言能够被看到
-    //             setDisplayedMessagesCount(MESSAGES_PER_PAGE);
-    //         } else if (data.error) {
-    //             showToast('error', data.error);
-    //         }
-    //     }
-    // }, [fetcher.state, fetcher.data, revalidator]);
+    // 响应处理 - 基于真实的fetcher状态显示反馈
+    useEffect(() => {
+        if (fetcher.state === "idle" && fetcher.data) {
+            const data = fetcher.data as { success?: string; error?: string };
+            
+            if (data.success) {
+                showToast('success', data.success);
+                setMessage('');
+                setShowEmojiPicker(false);
+                revalidator.revalidate();
+                // 重置显示数量，让新留言能够被看到
+                setDisplayedMessagesCount(MESSAGES_PER_PAGE);
+            } else if (data.error) {
+                showToast('error', data.error);
+            }
+        }
+    }, [fetcher.state, fetcher.data, revalidator]);
 
     // Close emoji picker when clicking outside
     useEffect(() => {
@@ -215,15 +232,14 @@ export default function HomeMessagesClient({ messages, userId, defaultAvatar }: 
     const displayedMessages = messagesArray.slice(0, displayedMessagesCount);
     const hasMoreMessages = displayedMessagesCount < messagesArray.length;
 
-    // 新增：表单提交时直接弹窗和清空输入框
+    // 表单提交处理 - 真实状态反馈
     const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (!message.trim()) return;
-        showToast('success', '留言已发送！');
-        setMessage('');
+        // 不再立即显示成功提示，而是等真正提交完成后再显示
+        // 清空输入框
         setShowEmojiPicker(false);
-        // 这里如果还想让后端收到数据，可以手动提交表单
-        // 但如果只想前端体验，下面这行可以注释掉
+        // 提交到服务器
         fetcher.submit(e.currentTarget);
     };
 
