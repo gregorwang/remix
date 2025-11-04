@@ -58,12 +58,22 @@ export const loader = async (args: LoaderFunctionArgs) => {
         throw new Response("无权限访问", { status: 403 });
     }
 
-    // 获取所有待审核的留言
-    const { data: pendingMessages, error: pendingError } = await supabase
+    // 分页配置
+    const ADMIN_MESSAGES_PER_PAGE = 50;
+    const url = new URL(request.url);
+    const pendingPage = parseInt(url.searchParams.get("pendingPage") || "1");
+    const pendingStart = (pendingPage - 1) * ADMIN_MESSAGES_PER_PAGE;
+    const pendingEnd = pendingStart + ADMIN_MESSAGES_PER_PAGE - 1;
+
+    // 获取待审核的留言（带分页）
+    const { data: pendingMessages, count: pendingCount, error: pendingError } = await supabase
         .from('messages')
-        .select('*')
+        .select('*', { count: 'exact' })
         .eq('status', 'pending')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .range(pendingStart, pendingEnd);
+
+    const totalPendingPages = Math.ceil((pendingCount || 0) / ADMIN_MESSAGES_PER_PAGE);
 
     // 获取最近已审核的留言（用于参考）
     const { data: recentMessages, error: recentError } = await supabase
@@ -92,7 +102,9 @@ export const loader = async (args: LoaderFunctionArgs) => {
         pendingMessages: pendingMessages || [],
         recentMessages: recentMessages || [],
         adminUser,
-        totalPending: pendingMessages?.length || 0
+        totalPending: pendingCount || 0,
+        totalPendingPages,
+        currentPendingPage: pendingPage
     }, { 
         headers: {
             // 管理页面数据实时性要求高，短缓存

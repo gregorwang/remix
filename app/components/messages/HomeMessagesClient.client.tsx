@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Link, useFetcher, useRevalidator, useOutletContext } from "@remix-run/react";
 import { useSupabase } from "~/hooks/useSupabase";
-import type { action } from "~/routes/_index";
+import type { action } from "~/routes/messages";
 import type { SupabaseOutletContext } from "~/lib/types";
 
 const EMOJIS = ['😀', '😃', '😄', '😁', '😅', '😂', '🤣', '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😚', '😋', '😛', '😝', '😜', '🤪', '🤨', '🧐', '🤓', '😎', '🥸', '🤩', '🥳', '😏', '😒', '😞', '😔', '😟', '😕', '🙁', '☹️', '😣', '😖', '😫', '😩', '🥺', '😢', '😭', '😤', '😠', '😡', '🤬', '🤯', '😳', '🥵', '🥶', '😱', '😨', '😰', '😥', '😓', '🫣', '🤗', '🫡', '🤔', '🫢', '🤭', '🤫', '🤥', '😶', '😐', '😑', '😬', '🫠', '🙄', '😯', '😦', '😧', '😮', '😲', '🥱', '😴', '🤤', '😪', '😵', '🫥', '🤐', '🥴', '🤢', '🤮', '🤧', '😷'];
@@ -62,6 +62,8 @@ export default function HomeMessagesClient({ messages, userId, defaultAvatar }: 
     // 新增：控制显示的留言数量
     const [displayedMessagesCount, setDisplayedMessagesCount] = useState(MESSAGES_PER_PAGE);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
+    // 新增：是否有新留言提示
+    const [hasNewMessages, setHasNewMessages] = useState(false);
 
     const isSubmitting = fetcher.state === "submitting";
 
@@ -78,20 +80,9 @@ export default function HomeMessagesClient({ messages, userId, defaultAvatar }: 
         }
     }, [toast]);
 
-    // 监听数据库变化 - 使用防抖优化性能
+    // 监听数据库变化 - 改为显示新留言提示，用户点击后才刷新
     useEffect(() => {
         if (!supabase) return;
-        
-        // 防抖函数，2秒内只执行一次
-        let debounceTimer: NodeJS.Timeout | null = null;
-        const debouncedRevalidate = () => {
-            if (debounceTimer) {
-                clearTimeout(debounceTimer);
-            }
-            debounceTimer = setTimeout(() => {
-                revalidator.revalidate();
-            }, 2000);
-        };
         
         const channel = supabase
             .channel('messages-channel')
@@ -101,17 +92,25 @@ export default function HomeMessagesClient({ messages, userId, defaultAvatar }: 
                 table: 'messages', 
                 filter: 'status=eq.approved' 
             },
-                debouncedRevalidate
+                () => {
+                    // 不自动刷新，而是显示提示
+                    setHasNewMessages(true);
+                }
             )
             .subscribe();
 
         return () => {
-            if (debounceTimer) {
-                clearTimeout(debounceTimer);
-            }
             supabase.removeChannel(channel);
         };
-    }, [supabase, revalidator]);
+    }, [supabase]);
+
+    // 处理刷新新留言
+    const handleRefreshNewMessages = () => {
+        setHasNewMessages(false);
+        revalidator.revalidate();
+        // 重置显示数量，让新留言能够被看到
+        setDisplayedMessagesCount(MESSAGES_PER_PAGE);
+    };
 
     // 响应处理 - 基于真实的fetcher状态显示反馈
     useEffect(() => {
@@ -211,12 +210,15 @@ export default function HomeMessagesClient({ messages, userId, defaultAvatar }: 
     const currentUserName = getCurrentUserName();
 
     // Ensure messages is an array and contains valid message objects
-    const messagesArray = Array.isArray(messages) ? messages.filter(msg => {
-        if (!msg || typeof msg !== 'object') return false;
-        if (!msg.id || !msg.content) return false;
-        if (typeof msg.content !== 'string') return false;
-        return true;
-    }) : [];
+    const messagesArray = useMemo(() => {
+        if (!Array.isArray(messages)) return [];
+        return messages.filter(msg => {
+            if (!msg || typeof msg !== 'object') return false;
+            if (!msg.id || !msg.content) return false;
+            if (typeof msg.content !== 'string') return false;
+            return true;
+        });
+    }, [messages]);
 
     // 懒加载更多留言
     const loadMoreMessages = () => {
@@ -229,7 +231,10 @@ export default function HomeMessagesClient({ messages, userId, defaultAvatar }: 
     };
 
     // 获取当前要显示的留言
-    const displayedMessages = messagesArray.slice(0, displayedMessagesCount);
+    const displayedMessages = useMemo(() =>
+        messagesArray.slice(0, displayedMessagesCount),
+        [messagesArray, displayedMessagesCount]
+    );
     const hasMoreMessages = displayedMessagesCount < messagesArray.length;
 
     // 表单提交处理 - 真实状态反馈
@@ -244,9 +249,22 @@ export default function HomeMessagesClient({ messages, userId, defaultAvatar }: 
     };
 
     return (
-        <div className="bg-white rounded-3xl shadow-xl border border-purple-100 overflow-hidden p-8 max-w-4xl mx-auto">
+        <div className="bg-white rounded-3xl shadow-xl border border-purple-100 overflow-hidden p-8 max-w-4xl mx-auto relative">
             {/* Toast 提示 */}
             {toast && <Toast type={toast.type} text={toast.text} onClose={() => setToast(null)} />}
+            
+            {/* 新留言提示按钮 */}
+            {hasNewMessages && (
+                <button
+                    onClick={handleRefreshNewMessages}
+                    className="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white px-6 py-3 rounded-full shadow-lg font-medium transition-all duration-300 transform hover:scale-105 flex items-center gap-2 animate-bounce"
+                >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    <span>有新留言</span>
+                </button>
+            )}
 
             {/* Messages Display */}
             {messagesArray.length > 0 ? (

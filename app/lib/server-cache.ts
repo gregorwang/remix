@@ -311,6 +311,10 @@ export const CacheKeys = {
   indexMessages: (page: number, status: string = 'approved') => 
     `index:messages:${page}:${status}`,
   
+  // 留言板页面消息列表
+  messagesMessages: (page: number, status: string = 'approved') => 
+    `messages:messages:${page}:${status}`,
+  
   // 用户权限检查
   userPermissions: (userId: string, hours: number) => 
     `user:permissions:${userId}:${hours}h`,
