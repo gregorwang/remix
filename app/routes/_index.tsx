@@ -9,11 +9,7 @@ import Header from "~/components/ui/Header";
 import Faq from "~/components/ui/question";
 import Footer from "~/components/ui/foot";
 import { Hero } from "~/components/ui/demo";
-import { calculatePagination } from "~/lib/utils/timeUtils";
-import { serverCache, CacheKeys } from "~/lib/server-cache";
 import CollapsibleMessages from "~/components/messages/CollapsibleMessages";
-
-const MESSAGES_PER_PAGE = 10;
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: styles },
@@ -35,11 +31,8 @@ export const meta: MetaFunction = () => {
     ];
 };
 
-// Loader function - 加载用户信息和留言数据（用于可展开的留言板）
+// Loader function - 只加载用户信息，不加载留言数据（完全懒加载）
 export const loader = async (args: LoaderFunctionArgs) => {
-    console.log('[IndexLoader] Starting...');
-    const startTime = Date.now();
-    
     const { request } = args;
     const { supabase } = createClient(request);
     
@@ -67,83 +60,15 @@ export const loader = async (args: LoaderFunctionArgs) => {
         };
     }
 
-    // 加载留言数据（用于可展开的留言板组件）
-    const url = new URL(request.url);
-    const page = parseInt(url.searchParams.get("page") || "1");
-    
-    const pagination = calculatePagination(0, MESSAGES_PER_PAGE, page);
-    const { rangeStart, rangeEnd } = pagination;
-
-    try {
-        // 从缓存获取消息数据
-        const messagesCacheKey = CacheKeys.indexMessages(page);
-        const cachedMessages = await serverCache.getOrSet(
-            messagesCacheKey,
-            async () => {
-                console.log('[IndexLoader] Cache miss for messages, fetching from DB...');
-                
-                const result = await supabase
-                    .from('messages')
-                    .select('*', { count: 'exact' })
-                    .eq('status', 'approved')
-                    .order('created_at', { ascending: false })
-                    .range(rangeStart, rangeEnd);
-                
-                if (result.error) {
-                    console.error('[IndexLoader] Database error:', result.error);
-                    return {
-                        messages: [],
-                        count: 0
-                    };
-                }
-                
-                return {
-                    messages: result.data || [],
-                    count: result.count || 0
-                };
-            },
-            30 * 1000 // 30秒缓存
-        );
-
-        const messagesData = cachedMessages || { messages: [], count: 0 };
-        const finalPagination = calculatePagination(messagesData.count, MESSAGES_PER_PAGE, page);
-        const defaultAvatar = "/favicon.ico";
-
-        const loadTime = Date.now() - startTime;
-        console.log(`[IndexLoader] Completed in ${loadTime}ms`);
-
-        return json({ 
-            userId,
-            currentUser,
-            messages: messagesData.messages,
-            totalPages: finalPagination.totalPages,
-            currentPage: page,
-            defaultAvatar
-        }, { 
-            headers: {
-                "Cache-Control": "public, max-age=300, s-maxage=900, stale-while-revalidate=3600",
-                "Vary": "Cookie, Authorization",
-            }
-        });
-
-    } catch (error) {
-        console.error("[IndexLoader] Unexpected error:", error);
-        
-        // 错误情况下返回基本数据
-        return json({ 
-            userId,
-            currentUser,
-            messages: [],
-            totalPages: 1,
-            currentPage: 1,
-            defaultAvatar: "/favicon.ico"
-        }, { 
-            headers: {
-                "Cache-Control": "public, max-age=60, s-maxage=120",
-                "Vary": "Cookie, Authorization",
-            }
-        });
-    }
+    return json({ 
+        userId,
+        currentUser
+    }, { 
+        headers: {
+            "Cache-Control": "public, max-age=300, s-maxage=900, stale-while-revalidate=3600",
+            "Vary": "Cookie, Authorization",
+        }
+    });
 };
 
 
@@ -214,7 +139,7 @@ export function ErrorBoundary() {
 }
 
 export default function Index() {
-  const { userId, messages, defaultAvatar } = useLoaderData<typeof loader>();
+  const { userId } = useLoaderData<typeof loader>();
   
   return (
     <div className="font-sans">
@@ -231,11 +156,9 @@ export default function Index() {
                     </p>
                 </div>
                 <div className="max-w-6xl mx-auto">
-                    {/* 可展开的留言板组件 */}
+                    {/* 可展开的留言板组件 - 完全懒加载 */}
                     <CollapsibleMessages 
-                        messages={Array.isArray(messages) ? messages : []}
                         userId={userId ?? null}
-                        defaultAvatar={defaultAvatar}
                     />
                 </div>
             </div>
