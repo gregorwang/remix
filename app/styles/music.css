@@ -1,6 +1,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap');
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css');
 
+/*
+ * 设计系统颜色变量
+ * 主色: #faf9f5 (60%) - 温暖奶白色
+ * 辅色: #f5f4ed (30%) - 浅米灰色
+ * 点缀色: #d97757 (展示) / #c96442 (交互) (10%) - 陶土橙色
+ * 文字色: #141413 - 深黑褐色
+ */
+
 * {
   font-family: 'Noto Sans SC', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
@@ -71,17 +79,18 @@
   }
 }
 
-/* 滚动进度条 */
+/* 滚动进度条 - 使用设计系统点缀色 */
 .constellation-progress {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 4px;
-  background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+  background: linear-gradient(90deg, #d97757, #c96442, #d97757, #c96442);
   transform-origin: left;
   transform: scaleX(0);
   z-index: 1000;
+  transition: transform 0.1s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* 粒子效果样式 */
@@ -97,7 +106,8 @@
 
 .particle {
   position: absolute;
-  background: radial-gradient(circle, rgba(255, 215, 0, 0.8) 0%, rgba(255, 215, 0, 0.2) 50%, transparent 100%);
+  /* 使用设计系统点缀色（陶土橙） */
+  background: radial-gradient(circle, rgba(217, 119, 87, 0.8) 0%, rgba(217, 119, 87, 0.2) 50%, transparent 100%);
   border-radius: 50%;
   animation: particle-float linear infinite;
   opacity: 0.7;
@@ -151,22 +161,22 @@
   to { opacity: 1; transform: scale(1); }
 }
 
-/* 应用动画 */
+/* 应用动画 - 使用设计系统 Expo Out 缓动 */
 .animate-pulse-slow {
-  animation: pulse-slow 4s ease-in-out infinite;
+  animation: pulse-slow 4s cubic-bezier(0.16, 1, 0.3, 1) infinite;
 }
 
 .animate-float {
-  animation: float 3s ease-in-out infinite;
+  animation: float 3s cubic-bezier(0.16, 1, 0.3, 1) infinite;
 }
 
-/* 星空主题样式 */
+/* 星空主题样式 - 使用设计系统点缀色 */
 .stellar-text {
-  background: linear-gradient(45deg, #ffd700, #ffeb3b, #ffc107);
+  background: linear-gradient(45deg, #d97757, #c96442, #d97757);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  text-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+  text-shadow: 0 0 30px rgba(217, 119, 87, 0.5);
 }
 
 .glowing-number {
@@ -180,22 +190,25 @@
 }
 
 .galaxy-bg {
-  background: radial-gradient(ellipse at center, rgba(138, 43, 226, 0.1) 0%, transparent 50%),
-              radial-gradient(ellipse at 80% 20%, rgba(30, 144, 255, 0.1) 0%, transparent 50%),
-              radial-gradient(ellipse at 20% 80%, rgba(255, 20, 147, 0.1) 0%, transparent 50%);
+  /* 使用设计系统点缀色创建渐变效果 */
+  background: radial-gradient(ellipse at center, rgba(217, 119, 87, 0.08) 0%, transparent 50%),
+              radial-gradient(ellipse at 80% 20%, rgba(201, 100, 66, 0.06) 0%, transparent 50%),
+              radial-gradient(ellipse at 20% 80%, rgba(217, 119, 87, 0.08) 0%, transparent 50%);
 }
 
-/* 颜色变量 */
+/* 颜色变量 - 使用设计系统颜色 */
 .text-galaxy-white {
   color: rgba(255, 255, 255, 0.8);
 }
 
+/* 设计系统点缀色（展示用） */
 .text-star-gold {
-  color: #ffd700;
+  color: #d97757; /* 陶土橙 - 展示用 */
 }
 
+/* 设计系统点缀色（交互用） */
 .text-aurora-purple {
-  color: #da70d6;
+  color: #c96442; /* 陶土橙 - 交互用 */
 }
 
 /* 歌词流动动画 */
@@ -226,46 +239,48 @@
   }
 }
 
-/* 音乐卡片样式 */
+/* 音乐卡片样式 - 使用设计系统动画 */
 .music-card {
-  transition: all 0.3s ease;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .card-hover:hover {
   transform: translateY(-5px) scale(1.02);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 20px 40px rgba(217, 119, 87, 0.2);
 }
 
 .stellar-glow {
-  box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+  /* 使用设计系统点缀色 */
+  box-shadow: 0 0 30px rgba(217, 119, 87, 0.4), 0 0 60px rgba(201, 100, 66, 0.2);
 }
 
-/* 统计卡片样式 */
+/* 统计卡片样式 - 使用设计系统颜色和动画 */
 .stat-card {
-  transition: all 0.3s ease;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .stat-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 10px 25px rgba(217, 119, 87, 0.15);
+  border-color: rgba(217, 119, 87, 0.3);
 }
 
-/* 关键词高亮样式 */
+/* 关键词高亮样式 - 使用设计系统点缀色 */
 .keyword-highlight {
   text-align: center;
   padding: 1rem;
   border-radius: 1rem;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(217, 119, 87, 0.1);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(217, 119, 87, 0.2);
 }
 
-/* 场景样式 */
+/* 场景样式 - 使用设计系统颜色创建温暖色调 */
 .afternoon-scene {
   position: relative;
-  background: linear-gradient(135deg, #87CEEB 0%, #FFE4B5 50%, #FFA07A 100%);
+  /* 使用设计系统主色和点缀色创建渐变 */
+  background: linear-gradient(135deg, #faf9f5 0%, #f5f4ed 30%, rgba(217, 119, 87, 0.3) 70%, rgba(201, 100, 66, 0.4) 100%);
   border-radius: 20px;
   overflow: hidden;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
@@ -276,7 +291,7 @@
 }
 
 .cloud {
-  animation: float 6s ease-in-out infinite;
+  animation: float 6s cubic-bezier(0.16, 1, 0.3, 1) infinite;
 }
 
 .hill {
@@ -334,11 +349,12 @@ img {
   content: '';
   position: absolute;
   inset: -4px;
-  background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57);
+  /* 使用设计系统点缀色创建旋转边框 */
+  background: linear-gradient(45deg, #d97757, #c96442, #d97757, #c96442, #d97757);
   border-radius: 50%;
   z-index: -1;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .main-artist-image:hover::before {
@@ -352,7 +368,7 @@ img {
 }
 
 .timeline-item {
-  transition: all 0.3s ease;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .timeline-item:hover {
@@ -360,18 +376,19 @@ img {
 }
 
 .timeline-item img {
-  transition: all 0.3s ease;
+  transition: filter 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   filter: brightness(0.9);
 }
 
 .timeline-item:hover img {
   filter: brightness(1.1);
-  box-shadow: 0 8px 25px rgba(255, 255, 255, 0.2);
+  /* 使用设计系统点缀色 */
+  box-shadow: 0 8px 25px rgba(217, 119, 87, 0.3);
 }
 
-/* 气泡动画 */
+/* 气泡动画 - 使用设计系统 Expo Out 缓动 */
 .floating {
-  animation: floating 6s ease-in-out infinite;
+  animation: floating 6s cubic-bezier(0.16, 1, 0.3, 1) infinite;
 }
 
 @keyframes floating {
@@ -402,14 +419,8 @@ img {
   }
 }
 
-/* 动画性能优化 */
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
+/* 动画性能优化 - 已移至 tailwind.css 全局样式 */
+/* 此处保留为空，避免重复定义 */
 
 /* 性能优化 - 年度歌手展示 */
 .main-artist-image,

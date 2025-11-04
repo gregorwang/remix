@@ -221,22 +221,22 @@ export default function ChatPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50">
-      <div className="flex flex-col min-h-screen bg-[#FAF9F5] font-sans">
+    <div className="min-h-screen bg-primary-50">
+      <div className="flex flex-col min-h-screen font-sans">
         {/* 顶部导航栏 */}
-        <header className="py-3 px-4 border-b border-gray-200" style={{ backgroundColor: '#FAF9F5' }}>
+        <header className="py-3 px-4 border-b border-primary-100">
           <div className="max-w-6xl mx-auto flex items-center justify-between">
             <Link to="/" className="flex items-center" prefetch="intent">
-              <div className="h-8 w-8 mr-2 bg-violet-600 rounded-lg flex items-center justify-center">
+              <div className="h-8 w-8 mr-2 bg-accent rounded-lg flex items-center justify-center transition-colors duration-300 ease-expo-out hover:bg-accent-hover">
                 <span className="text-white font-bold text-sm">N</span>
               </div>
-              <h1 className="text-lg font-medium text-gray-800">Nemesis</h1>
+              <h1 className="text-lg font-medium text-primary-950">Nemesis</h1>
             </Link>
             <div className="flex items-center gap-2">
-              <button className="p-2 text-gray-500 hover:text-gray-700 rounded-md hover:bg-gray-100">
+              <button className="p-2 text-primary-950/70 hover:text-primary-950 rounded hover:bg-primary-100 transition-colors duration-300 ease-expo-out">
                 <span className="text-lg">➕</span>
               </button>
-              <button className="p-2 text-gray-500 hover:text-gray-700 rounded-md hover:bg-gray-100">
+              <button className="p-2 text-primary-950/70 hover:text-primary-950 rounded hover:bg-primary-100 transition-colors duration-300 ease-expo-out">
                 <span className="text-lg">⋯</span>
               </button>
             </div>
@@ -248,32 +248,32 @@ export default function ChatPage() {
           {/* 欢迎信息 */}
           {messages.length <= 1 && (
             <div className="mb-8 text-center py-12">
-              <h2 className="text-2xl font-semibold text-gray-800 mb-3">{content.welcome_title}</h2>
-              <p className="text-gray-600 mb-6">{content.welcome_subtitle}</p>
+              <h2 className="text-2xl font-bold text-primary-950 mb-3">{content.welcome_title}</h2>
+              <p className="text-base leading-relaxed text-primary-950/70 mb-6">{content.welcome_subtitle}</p>
               
               {/* 建议问题 */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl mx-auto">
                 <button 
                   onClick={() => handlePresetQuestion(content.preset_questions.question1)}
-                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 px-4 rounded-xl text-left transition-colors text-sm"
+                  className="bg-primary-100 hover:bg-primary-100/80 text-primary-950 py-3 px-4 rounded-xl text-left transition-all duration-300 ease-expo-out text-sm font-medium hover:-translate-y-0.5"
                 >
                   {content.preset_questions.question1}
                 </button>
                 <button 
                   onClick={() => handlePresetQuestion(content.preset_questions.question2)}
-                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 px-4 rounded-xl text-left transition-colors text-sm"
+                  className="bg-primary-100 hover:bg-primary-100/80 text-primary-950 py-3 px-4 rounded-xl text-left transition-all duration-300 ease-expo-out text-sm font-medium hover:-translate-y-0.5"
                 >
                   {content.preset_questions.question2}
                 </button>
                 <button 
                   onClick={() => handlePresetQuestion(content.preset_questions.question3)}
-                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 px-4 rounded-xl text-left transition-colors text-sm"
+                  className="bg-primary-100 hover:bg-primary-100/80 text-primary-950 py-3 px-4 rounded-xl text-left transition-all duration-300 ease-expo-out text-sm font-medium hover:-translate-y-0.5"
                 >
                   {content.preset_questions.question3}
                 </button>
                 <button 
                   onClick={() => handlePresetQuestion(content.preset_questions.question4)}
-                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 px-4 rounded-xl text-left transition-colors text-sm"
+                  className="bg-primary-100 hover:bg-primary-100/80 text-primary-950 py-3 px-4 rounded-xl text-left transition-all duration-300 ease-expo-out text-sm font-medium hover:-translate-y-0.5"
                 >
                   {content.preset_questions.question4}
                 </button>
@@ -289,33 +289,33 @@ export default function ChatPage() {
                 className={`flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'}`}
               >
                 {/* 消息标签 */}
-                <div className="mb-1 px-2 text-sm text-gray-500">
+                <div className="mb-1 px-2 text-sm text-primary-950/70">
                   {message.role === 'user' ? content.user_label : content.assistant_label}
                 </div>
                 
                 {/* 消息内容 */}
-                <div className={`max-w-[90%] rounded-2xl p-4 ${
+                <div className={`max-w-[90%] rounded-2xl p-4 transition-all duration-300 ease-expo-out ${
                   message.role === 'user' 
-                    ? 'bg-violet-600 text-white' 
-                    : 'bg-gray-100 text-gray-800'
+                    ? 'bg-accent text-white' 
+                    : 'bg-primary-100 text-primary-950'
                 }`}>
-                  <p className="whitespace-pre-wrap">{message.content}</p>
+                  <p className="whitespace-pre-wrap text-base leading-relaxed">{message.content}</p>
                 </div>
                 
                 {/* 消息底部操作 */}
                 {message.role === 'assistant' && index > 0 && (
                   <div className="mt-2 flex space-x-2">
-                    <button className="p-1 text-gray-400 hover:text-gray-600 text-xs flex items-center">
+                    <button className="p-1 text-primary-950/50 hover:text-accent text-xs flex items-center transition-colors duration-300 ease-expo-out">
                       <span className="mr-1">👍</span>
                       {content.actions.helpful}
                     </button>
-                    <button className="p-1 text-gray-400 hover:text-gray-600 text-xs flex items-center">
+                    <button className="p-1 text-primary-950/50 hover:text-accent text-xs flex items-center transition-colors duration-300 ease-expo-out">
                       <span className="mr-1">👎</span>
                       {content.actions.not_helpful}
                     </button>
                     <button 
                       onClick={() => copyMessage(message.content)}
-                      className="p-1 text-gray-400 hover:text-gray-600 text-xs flex items-center"
+                      className="p-1 text-primary-950/50 hover:text-accent text-xs flex items-center transition-colors duration-300 ease-expo-out"
                     >
                       <span className="mr-1">📋</span>
                       {content.actions.copy}
@@ -328,17 +328,17 @@ export default function ChatPage() {
             {/* 加载状态 */}
             {isLoading && (
               <div className="flex flex-col items-start">
-                <div className="mb-1 px-2 text-sm text-gray-500">
+                <div className="mb-1 px-2 text-sm text-primary-950/70">
                   {content.assistant_label}
                 </div>
-                <div className="bg-gray-100 rounded-2xl p-4 max-w-[90%]">
+                <div className="bg-primary-100 rounded-2xl p-4 max-w-[90%]">
                   <div className="flex items-center space-x-2">
                     <div className="typing-indicator">
                       <span></span>
                       <span></span>
                       <span></span>
                     </div>
-                    <span className="text-gray-500 text-sm">{content.thinking}</span>
+                    <span className="text-primary-950/70 text-sm">{content.thinking}</span>
                   </div>
                 </div>
               </div>
@@ -347,7 +347,7 @@ export default function ChatPage() {
             {/* 错误提示 */}
             {error && (
               <div className="flex justify-center">
-                <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-red-600 text-sm">
+                <div className="bg-accent/10 border border-accent rounded-xl p-3 text-accent-hover text-sm">
                   {error}
                 </div>
               </div>
@@ -355,7 +355,7 @@ export default function ChatPage() {
           </div>
 
           {/* 输入区域 */}
-          <div className="border border-gray-200 rounded-xl bg-white shadow-sm">
+          <div className="border border-primary-100 rounded-xl bg-primary-100 shadow-sm">
             <div className="relative">
               <textarea 
                 ref={textareaRef}
@@ -363,33 +363,33 @@ export default function ChatPage() {
                 onChange={(e) => setInputMessage(e.target.value)}
                 onKeyDown={handleEnter}
                 placeholder={content.placeholder}
-                className="w-full p-4 pr-24 rounded-xl resize-none focus:outline-none focus:ring-1 focus:ring-violet-500 min-h-[60px] max-h-[200px]"
+                className="w-full p-4 pr-24 rounded-xl resize-none focus:outline-none focus:ring-1 focus:ring-accent min-h-[60px] max-h-[200px] bg-primary-100 text-primary-950 placeholder:text-primary-950/50"
                 rows={1}
               />
               <div className="absolute right-3 bottom-3 flex gap-2">
                 <button 
-                  className="p-2 text-gray-400 hover:text-gray-600 rounded-lg"
+                  className="p-2 text-primary-950/50 hover:text-accent rounded transition-colors duration-300 ease-expo-out"
                   title={content.upload_files}
                 >
                   <span className="text-lg">📤</span>
                 </button>
                 <button 
                   onClick={() => sendMessage()}
-                  className="bg-violet-600 text-white p-2 rounded-lg hover:bg-violet-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="bg-accent text-white p-2 rounded hover:bg-accent-hover transition-colors duration-300 ease-expo-out disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={!inputMessage.trim() || isLoading}
                 >
                   <span className="text-lg">✈️</span>
                 </button>
               </div>
             </div>
-            <div className="px-4 py-2 text-xs text-gray-500 border-t border-gray-200 flex justify-between items-center">
+            <div className="px-4 py-2 text-xs text-primary-950/70 border-t border-primary-100 flex justify-between items-center">
               <span>{content.enter_to_send}</span>
               <span>{content.shift_enter_newline}</span>
             </div>
           </div>
           
           {/* 底部提示 */}
-          <p className="text-center text-gray-500 text-xs mt-4">
+          <p className="text-center text-primary-950/70 text-xs mt-4">
             {content.privacy_notice}
           </p>
 
@@ -398,7 +398,7 @@ export default function ChatPage() {
             <Link
               to="/"
               prefetch="intent"
-              className="text-violet-600 hover:text-violet-800 underline transition-colors duration-200"
+              className="text-accent hover:text-accent-hover transition-colors duration-300 ease-expo-out font-medium"
             >
               ← 返回首页
             </Link>
@@ -411,15 +411,15 @@ export default function ChatPage() {
 
 export function ErrorBoundary() {
   return (
-    <div className="min-h-screen bg-[#FAF9F5] flex items-center justify-center">
-      <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full mx-4">
+    <div className="min-h-screen bg-primary-50 flex items-center justify-center">
+      <div className="bg-primary-100 p-8 rounded-lg shadow-lg max-w-md w-full mx-4">
         <div className="text-center">
-          <h1 className="text-xl font-semibold text-gray-800 mb-2">聊天室错误</h1>
-          <p className="text-gray-600 mb-4">抱歉，聊天室暂时无法使用。</p>
+          <h1 className="text-xl font-semibold text-primary-950 mb-2">聊天室错误</h1>
+          <p className="text-base leading-relaxed text-primary-950/70 mb-4">抱歉，聊天室暂时无法使用。</p>
           <Link
             to="/"
             prefetch="intent"
-            className="bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded transition-colors inline-block"
+            className="bg-accent hover:bg-accent-hover text-white px-4 py-2 rounded font-medium transition-colors duration-300 ease-expo-out inline-block"
           >
             返回首页
           </Link>

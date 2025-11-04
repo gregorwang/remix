@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { ClientOnly } from "~/components/common/ClientOnly";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { useFetcher } from "@remix-run/react";
-import React from "react";
 import type { loader as messagesLoader } from "~/routes/messages";
+
+// ✅ 最佳实践：在模块顶层声明 lazy 组件
+const HomeMessagesClient = lazy(() => import("~/components/messages/HomeMessagesClient.client"));
 
 interface Message {
     id: string;
@@ -103,31 +104,22 @@ export default function CollapsibleMessages({ userId }: CollapsibleMessagesProps
                                     </div>
                                 </div>
                             ) : (
-                                // 数据加载完成，渲染留言板组件
-                                <ClientOnly>
-                                    {() => {
-                                        const LazyHomeMessages = React.lazy(() => 
-                                            import("~/components/messages/HomeMessagesClient.client")
-                                        );
-                                        return (
-                                            <React.Suspense fallback={
-                                                <div className="bg-white rounded-3xl shadow-xl border border-purple-100 overflow-hidden p-8">
-                                                    <div className="animate-pulse space-y-4">
-                                                        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                                                        <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                                                        <div className="h-32 bg-gray-200 rounded"></div>
-                                                    </div>
-                                                </div>
-                                            }>
-                                                <LazyHomeMessages 
-                                                    messages={Array.isArray(messages) ? messages : []}
-                                                    userId={userId ?? null}
-                                                    defaultAvatar={defaultAvatar}
-                                                />
-                                            </React.Suspense>
-                                        );
-                                    }}
-                                </ClientOnly>
+                                // ✅ 数据加载完成，渲染留言板组件 - 使用最佳实践
+                                <Suspense fallback={
+                                    <div className="bg-white rounded-3xl shadow-xl border border-purple-100 overflow-hidden p-8">
+                                        <div className="animate-pulse space-y-4">
+                                            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                                            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                                            <div className="h-32 bg-gray-200 rounded"></div>
+                                        </div>
+                                    </div>
+                                }>
+                                    <HomeMessagesClient 
+                                        messages={Array.isArray(messages) ? messages : []}
+                                        userId={userId ?? null}
+                                        defaultAvatar={defaultAvatar}
+                                    />
+                                </Suspense>
                             )}
                         </>
                     )}

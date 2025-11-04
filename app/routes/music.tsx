@@ -1,11 +1,12 @@
 import type { LinksFunction, MetaFunction } from "@remix-run/node";
+import type { ClientLoaderFunctionArgs } from "@remix-run/react";
 import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
-import { Suspense, lazy } from "react";
 import musicStyles from "~/styles/music.css?url";
 import { generateImageTokens } from "~/utils/imageToken.server";
 
-const MusicPageClient = lazy(() => import('~/components/music/MusicPageClient.client'));
+// 直接导入，移除 lazy() - Remix 已经在路由级别自动进行代码分割
+import MusicPageClient from '~/components/music/MusicPageClient.client';
 
 export const links: LinksFunction = () => [
   { rel: 'stylesheet', href: musicStyles },
@@ -122,23 +123,73 @@ export async function loader() {
   };
   return json(data, {
     headers: {
-      "Cache-Control": "public, max-age=300", // token数据缓存5分钟
+      "Cache-Control": "public, max-age=3600", // token数据缓存1小时
     }
   });
+}
+
+// 🎉 Remix 最佳实践：使用 clientLoader 实现客户端缓存
+export async function clientLoader({ 
+  serverLoader 
+}: ClientLoaderFunctionArgs) {
+  const CACHE_KEY = 'music-page-data';
+  const CACHE_VERSION = 'v1';
+  const CACHE_DURATION = 5 * 60 * 1000; // 5分钟
+
+  try {
+    // 尝试从 sessionStorage 读取缓存
+    const cachedItem = sessionStorage.getItem(CACHE_KEY);
+    
+    if (cachedItem) {
+      const { data, timestamp, version } = JSON.parse(cachedItem);
+      const now = Date.now();
+      
+      // 检查缓存是否有效（版本匹配且未过期）
+      if (version === CACHE_VERSION && now - timestamp < CACHE_DURATION) {
+        console.log('✅ 使用缓存数据');
+        return data;
+      }
+    }
+  } catch (error) {
+    console.warn('读取缓存失败:', error);
+  }
+
+  // 缓存无效或不存在，从服务器加载
+  console.log('📡 从服务器加载数据');
+  const serverData = await serverLoader();
+
+  // 保存到 sessionStorage
+  try {
+    sessionStorage.setItem(CACHE_KEY, JSON.stringify({
+      data: serverData,
+      timestamp: Date.now(),
+      version: CACHE_VERSION
+    }));
+  } catch (error) {
+    console.warn('保存缓存失败:', error);
+  }
+
+  return serverData;
+}
+// 在初始hydration时也运行 clientLoader
+clientLoader.hydrate = true;
+
+// Remix v2 推荐：使用 HydrateFallback 替代 Suspense
+export function HydrateFallback() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
+      <div className="text-white">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="w-12 h-12 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
+          <p className="text-xl font-medium">Loading Music Page...</p>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function Music() {
   const data = useLoaderData<typeof loader>();
 
-  return (
-    <div>
-      <Suspense fallback={
-        <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
-          <div className="text-white text-xl">Loading Music Page...</div>
-        </div>
-      }>
-        <MusicPageClient {...data} />
-      </Suspense>
-    </div>
-  );
+  return <MusicPageClient {...data} />;
 }

@@ -1,14 +1,16 @@
 import type { ActionFunctionArgs, LinksFunction, LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { useLoaderData, useRouteError, isRouteErrorResponse } from "@remix-run/react";
-import React from "react";
+import { lazy, Suspense } from "react";
 // Removed Clerk imports - now using Supabase authentication only
 import { createClient } from "~/utils/supabase.server";
 import Header from "~/components/ui/Header";
 import Footer from "~/components/ui/foot";
-import { ClientOnly } from "~/components/common/ClientOnly";
 import { calculatePagination } from "~/lib/utils/timeUtils";
 import { serverCache, CacheKeys } from "~/lib/server-cache";
+
+// ✅ 最佳实践：在模块顶层声明 lazy 组件
+const HomeMessagesClient = lazy(() => import("~/components/messages/HomeMessagesClient.client"));
 
 const MESSAGES_PER_PAGE = 10;
 
@@ -280,25 +282,25 @@ export function ErrorBoundary() {
   // 友好错误显示
   if (isRouteErrorResponse(error)) {
     return (
-      <div className="font-sans min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="font-sans min-h-screen flex items-center justify-center bg-primary-50">
         <div className="text-center p-8 max-w-md">
           <div className="mb-6">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
-              <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-full mb-4">
+              <svg className="w-8 h-8 text-primary-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
             </div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">
+            <h2 className="text-2xl font-bold text-primary-950 mb-2">
               {error.status === 404 ? '页面未找到' : '出现错误'}
             </h2>
-            <p className="text-gray-600 mb-6">
+            <p className="text-primary-950/70 mb-6">
               {error.status === 404 
                 ? '抱歉，您访问的页面不存在。' 
                 : `错误代码: ${error.status || 500}`}
             </p>
             <button
               onClick={() => window.location.href = '/'}
-              className="inline-block bg-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-purple-700 transition-colors"
+              className="inline-block bg-accent text-white px-6 py-3 rounded-lg font-medium hover:bg-accent-hover transition-colors"
             >
               返回首页
             </button>
@@ -310,31 +312,45 @@ export function ErrorBoundary() {
 
   // 未知错误
   return (
-    <div className="font-sans min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="font-sans min-h-screen flex items-center justify-center bg-primary-50">
       <div className="text-center p-8 max-w-md">
         <div className="mb-6">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
-            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-full mb-4">
+            <svg className="w-8 h-8 text-primary-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
           </div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">出现错误</h2>
-          <p className="text-gray-600 mb-6">
+          <h2 className="text-2xl font-bold text-primary-950 mb-2">出现错误</h2>
+          <p className="text-primary-950/70 mb-6">
             留言板加载失败，请稍后重试。
           </p>
           <button
             onClick={() => window.location.reload()}
-            className="inline-block bg-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-purple-700 transition-colors mr-4"
+            className="inline-block bg-accent text-white px-6 py-3 rounded-lg font-medium hover:bg-accent-hover transition-colors mr-4"
           >
             刷新页面
           </button>
           <button
             onClick={() => window.location.href = '/'}
-            className="inline-block bg-gray-200 text-gray-800 px-6 py-3 rounded-lg font-medium hover:bg-gray-300 transition-colors"
+            className="inline-block bg-primary-100 text-primary-950 px-6 py-3 rounded-lg font-medium hover:bg-primary-100/80 transition-colors"
           >
             返回首页
           </button>
         </div>
+      </div>
+    </div>
+  );
+}
+
+// ✅ 加载中的骨架屏组件
+function MessagesSkeleton() {
+  return (
+    <div className="bg-white rounded-3xl shadow-xl border border-purple-100 overflow-hidden p-8 max-w-4xl mx-auto">
+      <div className="animate-pulse space-y-4">
+        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+        <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+        <div className="h-32 bg-gray-200 rounded"></div>
+        <div className="h-4 bg-gray-200 rounded w-2/3"></div>
       </div>
     </div>
   );
@@ -357,30 +373,14 @@ export default function Messages() {
                     </p>
                 </div>
                 <div className="max-w-4xl mx-auto">
-                    <ClientOnly>
-                        {() => {
-                            const LazyHomeMessages = React.lazy(() => 
-                                import("~/components/messages/HomeMessagesClient.client")
-                            );
-                            return (
-                                <React.Suspense fallback={
-                                    <div className="bg-white rounded-3xl shadow-xl border border-purple-100 overflow-hidden p-8 max-w-4xl mx-auto">
-                                        <div className="animate-pulse space-y-4">
-                                            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                                            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                                            <div className="h-32 bg-gray-200 rounded"></div>
-                                        </div>
-                                    </div>
-                                }>
-                                    <LazyHomeMessages 
-                                        messages={Array.isArray(messages) ? messages : []}
-                                        userId={userId ?? null}
-                                        defaultAvatar={defaultAvatar}
-                                    />
-                                </React.Suspense>
-                            );
-                        }}
-                    </ClientOnly>
+                    {/* ✅ 最佳实践：直接使用 Suspense，支持 SSR */}
+                    <Suspense fallback={<MessagesSkeleton />}>
+                        <HomeMessagesClient 
+                            messages={Array.isArray(messages) ? messages : []}
+                            userId={userId ?? null}
+                            defaultAvatar={defaultAvatar}
+                        />
+                    </Suspense>
                 </div>
             </div>
         </section>

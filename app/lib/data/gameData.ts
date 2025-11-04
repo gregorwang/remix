@@ -1,28 +1,17 @@
-import type { LinksFunction, LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
-import { json } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
-import { Suspense, lazy } from "react";
-import gameStyles from "~/styles/game.css?url";
-import { generateImageTokens } from "~/utils/imageToken.server";
+// 游戏数据文件
+// Remix 最佳实践：将数据与路由逻辑分离
+// TODO: 未来应该迁移到数据库
 
-// Import the client component using lazy loading for better bundle splitting
-const GamePageClient = lazy(() => import("~/components/game/GamePageClient.client"));
+import type { Game, Platform, UserStat, FollowedGame, AllGamesData } from "~/lib/types/game";
 
-// Import utils for platform validation and pagination logic
-import { 
-  getValidPlatformId, 
-  paginateGames 
-} from "~/lib/utils/gameUtils";
-
-// --- Data (moved from Vue component) ---
-const userStats = [
+export const userStats: UserStat[] = [
   { label: '游戏总数', value: '156' },
   { label: '完成度', value: '78%' },
   { label: '游戏时长', value: '1150h' },
   { label: '成就解锁', value: '1,204' }
 ];
 
-const platforms = [
+export const platforms: Platform[] = [
   {
     id: 'playstation',
     name: 'PlayStation',
@@ -63,21 +52,6 @@ const platforms = [
   }
 ];
 
-// Game type that allows null for some fields
-type Game = {
-  id: number;
-  name: string;
-  playTime: string;
-  progress: number | null;
-  trophies: { platinum: number; gold: number; silver: number; bronze: number };
-  achievementsCurrent: number | null;
-  achievementsTotal: number | null;
-  rating: number;
-  review: string;
-  tags: string[];
-  cover: string;
-};
-
 const playstationGames: Game[] = [
   { id: 1, name: '破晓传奇', playTime: '57h', progress: Math.round(22 / 59 * 100), trophies: { platinum: 1, gold: 2, silver: 19, bronze: 0 }, achievementsCurrent: 22, achievementsTotal: 59, rating: 9, review: '我也不知道我为啥玩儿了五十个小时', tags: ['JRPG', '剧情', '动画'], cover: 'game/pox.jpg' },
   { id: 2, name: '剑星', playTime: '51h', progress: Math.round(28 / 45 * 100), trophies: { platinum: 1, gold: 6, silver: 21, bronze: 0 }, achievementsCurrent: 28, achievementsTotal: 45, rating: 9, review: '还是代餐', tags: ['动作', 'RPG', '科幻'], cover: 'game/header_tchinese.jpg' },
@@ -113,116 +87,14 @@ const pcGames: Game[] = [
   { id: 32, name: '战神', playTime: '45h', progress: null, trophies: { platinum: 0, gold: 0, silver: 0, bronze: 0 }, achievementsCurrent: null, achievementsTotal: null, rating: 10, review: '父子情深的神话史诗', tags: ['动作', '剧情', '北欧神话'], cover: 'game/zhanshen.jpg' }
 ];
 
-const followedGames = [
+export const followedGames: FollowedGame[] = [
   { id: 101, name: '羊蹄山之魂', releaseDate: '2024年10月', rating: 9.5, cover: 'game/yts.jpg' },
   { id: 102, name: 'GTA6', releaseDate: '2026年夏季', rating: 9.8, cover: 'game/gta6.jpg' }
 ];
 
-const allGamesData = {
+export const allGamesData: AllGamesData = {
   playstation: playstationGames,
   switch: switchGames,
   pc: pcGames
 };
 
-type PlatformId = keyof typeof allGamesData;
-
-// Loader function - 在服务端批量生成所有图片token
-export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const url = new URL(request.url);
-  const platformIdParam = url.searchParams.get("platform") || "playstation";
-  const currentPage = parseInt(url.searchParams.get("page") || "1", 10);
-  
-  // 使用工具函数验证平台ID (纯算法逻辑已提取)
-  const platformId = getValidPlatformId(platformIdParam, 'playstation') as PlatformId;
-  
-  // 使用工具函数进行分页计算 (纯算法逻辑已提取)
-  const paginationResult = paginateGames(allGamesData[platformId], currentPage, 8);
-
-  // 收集所有图片路径
-  const allImagePaths = [
-    'game/jkl.jpg', // 头像图片（使用2次）
-    ...paginationResult.paginatedGames.map(game => game.cover),
-    ...followedGames.map(game => game.cover),
-  ];
-
-  // 批量生成所有图片token
-  const tokenResults = generateImageTokens(allImagePaths, 30);
-  const tokenMap = new Map(tokenResults.map(result => [result.imageName, result.imageUrl]));
-
-  // 替换所有游戏封面的src为带token的完整URL
-  const paginatedGames = paginationResult.paginatedGames.map(game => ({
-    ...game,
-    cover: tokenMap.get(game.cover) || game.cover
-  }));
-
-  const followedGamesWithTokens = followedGames.map(game => ({
-    ...game,
-    cover: tokenMap.get(game.cover) || game.cover
-  }));
-
-  const avatarImageUrl = tokenMap.get('game/jkl.jpg') || 'game/jkl.jpg';
-
-  const data = {
-    userStats,
-    platforms,
-    platformId,
-    paginatedGames,
-    totalGames: paginationResult.totalGames,
-    totalPages: paginationResult.totalPages,
-    currentPage: paginationResult.currentPage,
-    followedGames: followedGamesWithTokens,
-    avatarImageUrl, // 传递头像URL给客户端
-  };
-
-  return json(data, {
-    headers: {
-      "Cache-Control": "public, max-age=300", // token数据缓存5分钟
-      "Content-Type": "application/json",
-    },
-  });
-};
-
-// --- Remix Meta ---
-export const meta: MetaFunction = () => {
-  return [
-    { title: "游戏中心 - 我的游戏收藏" },
-    { name: "description", content: "展示我的游戏收藏、成就和评分" },
-  ];
-};
-
-// --- Remix Links ---
-export const links: LinksFunction = () => [
-  { rel: "stylesheet", href: gameStyles },
-];
-
-
-// --- Main Component ---
-export default function GameRoute() {
-  const data = useLoaderData<typeof loader>();
-
-  return (
-    <div className="min-h-screen bg-primary-50 relative overflow-hidden">
-      {/* Dynamic background particles with warm accent color */}
-      <div className="absolute inset-0 overflow-hidden">
-        {Array.from({ length: 50 }).map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-1 h-1 bg-accent/20 rounded-full animate-pulse"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 3}s`,
-              animationDuration: `${2 + Math.random() * 3}s`,
-            }}
-          />
-        ))}
-      </div>
-
-      <div className="relative z-10">
-        <Suspense fallback={<div className="text-primary-950">Loading Game Page...</div>}>
-          <GamePageClient {...data} />
-        </Suspense>
-      </div>
-    </div>
-  );
-} 

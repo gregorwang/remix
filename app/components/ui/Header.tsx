@@ -7,7 +7,6 @@ import {
 } from '@headlessui/react'
 import { Link, useOutletContext, useFetcher } from '@remix-run/react'
 import { isAdmin } from '~/lib/constants';
-import { AuroraText } from '~/components/common/magicui/aurora-text';
 import type { SupabaseOutletContext } from '~/lib/types';
 
 const navigation = [
@@ -44,7 +43,7 @@ export default function Example() {
         <div className="flex lg:flex-1">
           <Link to="/" prefetch="intent" className="-m-1.5 p-1.5">
             <div className="text-3xl font-bold text-gray-900">
-              GREGOR<AuroraText className="text-3xl font-bold">WANG</AuroraText>
+              GREGOR<span className="bg-gradient-to-r from-purple-600 via-blue-600 to-purple-600 bg-clip-text text-transparent">WANG</span>
             </div>
           </Link>
         </div>
@@ -115,7 +114,7 @@ export default function Example() {
           <div className="flex items-center justify-between">
             <Link to="/" prefetch="intent" className="-m-1.5 p-1.5" onClick={() => setMobileMenuOpen(false)}>
               <div className="text-3xl font-bold text-gray-900">
-                GREGOR<AuroraText className="text-3xl font-bold">WANG</AuroraText>
+                GREGOR<span className="bg-gradient-to-r from-purple-600 via-blue-600 to-purple-600 bg-clip-text text-transparent">WANG</span>
               </div>
             </Link>
             <button

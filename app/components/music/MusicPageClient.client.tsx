@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { useMusicAnimations } from '~/hooks/useMusicAnimations.client';
 import type { loader } from '~/routes/music';
 import type { SerializeFrom } from '@remix-run/node';
@@ -16,7 +16,13 @@ export default function MusicPageClient(loaderData: LoaderData) {
     const dnaImages = loaderData.initialDnaImages;
     const musicImages = loaderData.initialMusicImages;
     const albums = loaderData.initialAlbums;
-    const isInitialized = true; // 服务端已初始化，直接设为true
+    
+    // 确保动画只在客户端运行
+    const [isClient, setIsClient] = useState(false);
+    
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
 
     // Refs for animated elements
     const scrollIndicator = useRef<HTMLDivElement>(null);
@@ -35,7 +41,7 @@ export default function MusicPageClient(loaderData: LoaderData) {
     const keyInfo = useRef<HTMLDivElement>(null);
     const scrollHint = useRef<HTMLDivElement>(null);
 
-    // Call the custom hook to handle animations
+    // Call the custom hook to handle animations - 只在客户端运行
     useMusicAnimations({
         scrollIndicator,
         statsContent,
@@ -52,7 +58,7 @@ export default function MusicPageClient(loaderData: LoaderData) {
         dnaVisual,
         keyInfo,
         scrollHint
-    }, isInitialized);
+    }, isClient);
 
 
     const getParticleStyle = (index: number) => {
@@ -490,12 +496,12 @@ export default function MusicPageClient(loaderData: LoaderData) {
                                 </div>
                                 <div className="grid grid-cols-2 gap-4 h-80">
                                     {albums.slice(0, 4).map((album, index) => (
-                                        <div key={album.id} className="album-item transform transition-all duration-300 hover:scale-110 flex items-center justify-center" style={{ animationDelay: `${index * 0.1}s` }}>
+                                        <div key={album.id} className="album-item transform transition-transform duration-300 ease-expo-out hover:scale-110 flex items-center justify-center" style={{ animationDelay: `${index * 0.1}s` }}>
                                             <img
                                                 src={getImageSrc(album.id, albums)}
                                                 alt={album.alt || ''}
                                                 onError={() => console.error('Image failed to load:', getImageSrc(album.id, albums))}
-                                                className="w-full h-full object-cover rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform-gpu"
+                                                className="w-full h-full object-cover rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 ease-expo-out transform-gpu"
                                                 loading="lazy"
                                                 decoding="async"
                                             />
@@ -528,7 +534,7 @@ export default function MusicPageClient(loaderData: LoaderData) {
                                             <div className="text-base font-black text-white">四季音色</div>
                                         </div>
                                         <div className="w-20 h-20 md:w-25 md:h-25 rounded-full overflow-hidden shadow-lg border-2 border-white/40">
-                                            <img src={getImageSrc('ee', musicImages)} alt="四季音色" onError={() => console.error('Image failed to load:', getImageSrc('ee', musicImages))} className="w-full h-full object-cover transition-transform duration-300 hover:scale-110" loading="lazy" decoding="async" />
+                                            <img src={getImageSrc('ee', musicImages)} alt="四季音色" onError={() => console.error('Image failed to load:', getImageSrc('ee', musicImages))} className="w-full h-full object-cover transition-transform duration-300 ease-expo-out hover:scale-110 transform-gpu" loading="lazy" decoding="async" />
                                         </div>
                                     </div>
                                 </div>
@@ -540,7 +546,7 @@ export default function MusicPageClient(loaderData: LoaderData) {
                                             <div className="text-base font-black text-white">Vivienne</div>
                                         </div>
                                         <div className="w-20 h-20 md:w-25 md:h-25 rounded-full overflow-hidden shadow-lg border-2 border-white/40">
-                                            <img src={getImageSrc('f', musicImages)} alt="Vivienne 2022" onError={() => console.error('Image failed to load:', getImageSrc('f', musicImages))} className="w-full h-full object-cover transition-transform duration-300 hover:scale-110" loading="lazy" decoding="async" />
+                                            <img src={getImageSrc('f', musicImages)} alt="Vivienne 2022" onError={() => console.error('Image failed to load:', getImageSrc('f', musicImages))} className="w-full h-full object-cover transition-transform duration-300 ease-expo-out hover:scale-110 transform-gpu" loading="lazy" decoding="async" />
                                         </div>
                                     </div>
                                 </div>
@@ -555,7 +561,7 @@ export default function MusicPageClient(loaderData: LoaderData) {
                             
                             <div ref={mainArtist} className="mb-8 opacity-0">
                                 <div className="w-32 h-32 md:w-44 md:h-44 rounded-full overflow-hidden shadow-2xl mx-auto mb-6 main-artist-image">
-                                    <img src={getImageSrc('f', musicImages)} alt="Vivienne 2024年度歌手" onError={() => console.error('Image failed to load:', getImageSrc('f', musicImages))} className="w-full h-full object-cover transition-transform duration-500 hover:scale-110 transform-gpu" loading="lazy" decoding="async" fetchPriority="high" />
+                                    <img src={getImageSrc('f', musicImages)} alt="Vivienne 2024年度歌手" onError={() => console.error('Image failed to load:', getImageSrc('f', musicImages))} className="w-full h-full object-cover transition-transform duration-600 ease-expo-out hover:scale-110 transform-gpu" loading="lazy" decoding="async" fetchPriority="high" />
                                 </div>
                             </div>
                             
@@ -599,7 +605,7 @@ export default function MusicPageClient(loaderData: LoaderData) {
                                         </div>
                                     </div>
                                 </div>
-                                <button className="bg-white/20 hover:bg-white/30 backdrop-blur-lg rounded-full px-6 py-2 text-white font-medium transition-all duration-300 transform hover:scale-105 text-sm">
+                                <button className="bg-white/20 hover:bg-white/30 backdrop-blur-lg rounded-full px-6 py-2 text-white font-medium transition-[background-color,transform] duration-300 ease-expo-out transform hover:scale-105 text-sm">
                                     已关注
                                 </button>
                             </div>
@@ -616,7 +622,7 @@ export default function MusicPageClient(loaderData: LoaderData) {
                                             <div className="text-base font-black text-white">Vivienne</div>
                                         </div>
                                         <div className="w-20 h-20 md:w-25 md:h-25 rounded-full overflow-hidden shadow-lg border-2 border-white/40">
-                                            <img src={getImageSrc('f', musicImages)} alt="Vivienne 2021" onError={() => console.error('Image failed to load:', getImageSrc('f', musicImages))} className="w-full h-full object-cover transition-transform duration-300 hover:scale-110" loading="lazy" decoding="async" />
+                                            <img src={getImageSrc('f', musicImages)} alt="Vivienne 2021" onError={() => console.error('Image failed to load:', getImageSrc('f', musicImages))} className="w-full h-full object-cover transition-transform duration-300 ease-expo-out hover:scale-110 transform-gpu" loading="lazy" decoding="async" />
                                         </div>
                                     </div>
                                 </div>
@@ -628,7 +634,7 @@ export default function MusicPageClient(loaderData: LoaderData) {
                                             <div className="text-base font-black text-white">FELT</div>
                                         </div>
                                         <div className="w-20 h-20 md:w-25 md:h-25 rounded-full overflow-hidden shadow-lg border-2 border-white/40">
-                                            <img src={getImageSrc('o', musicImages)} alt="FELT 2020" onError={() => console.error('Image failed to load:', getImageSrc('o', musicImages))} className="w-full h-full object-cover transition-transform duration-300 hover:scale-110" loading="lazy" decoding="async" />
+                                            <img src={getImageSrc('o', musicImages)} alt="FELT 2020" onError={() => console.error('Image failed to load:', getImageSrc('o', musicImages))} className="w-full h-full object-cover transition-transform duration-300 ease-expo-out hover:scale-110 transform-gpu" loading="lazy" decoding="async" />
                                         </div>
                                     </div>
                                 </div>
@@ -640,7 +646,7 @@ export default function MusicPageClient(loaderData: LoaderData) {
                                             <div className="text-base font-black text-white">FELT</div>
                                         </div>
                                         <div className="w-20 h-20 md:w-25 md:h-25 rounded-full overflow-hidden shadow-lg border-2 border-white/40">
-                                            <img src={getImageSrc('o', musicImages)} alt="FELT 2019" onError={() => console.error('Image failed to load:', getImageSrc('o', musicImages))} className="w-full h-full object-cover transition-transform duration-300 hover:scale-110" loading="lazy" decoding="async" />
+                                            <img src={getImageSrc('o', musicImages)} alt="FELT 2019" onError={() => console.error('Image failed to load:', getImageSrc('o', musicImages))} className="w-full h-full object-cover transition-transform duration-300 ease-expo-out hover:scale-110 transform-gpu" loading="lazy" decoding="async" />
                                         </div>
                                     </div>
                                 </div>

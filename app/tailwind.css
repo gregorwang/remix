@@ -63,36 +63,39 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Custom text selection */
+/* Custom text selection - 使用设计系统颜色 */
 ::selection {
-  background: rgba(139, 92, 246, 0.3);
-  color: white;
+  background: rgba(217, 119, 87, 0.3); /* accent color */
+  color: #141413; /* primary-950 */
 }
 
 ::-moz-selection {
-  background: rgba(139, 92, 246, 0.3);
-  color: white;
+  background: rgba(217, 119, 87, 0.3); /* accent color */
+  color: #141413; /* primary-950 */
 }
 
 html,
 body {
   @apply bg-white dark:bg-gray-950;
+  font-family: "source-han-serif-sc", "Noto Serif SC", serif;
+  font-weight: 300;
+  font-style: normal;
 
   @media (prefers-color-scheme: dark) {
     color-scheme: dark;
   }
 }
 
-/* 聊天界面专用样式 */
+/* 聊天界面专用样式 - 使用设计系统颜色 */
 .chat-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: rgba(139, 92, 246, 0.3) transparent;
+  scrollbar-color: rgba(217, 119, 87, 0.3) transparent; /* accent color */
   --scrollbar-width: 6px;
-  --scrollbar-thumb-color: rgba(139, 92, 246, 0.3);
+  --scrollbar-thumb-color: rgba(217, 119, 87, 0.3);
   --scrollbar-track-color: transparent;
   --scrollbar-track-bg: transparent;
-  --scrollbar-thumb-bg: rgba(139, 92, 246, 0.3);
-  --scrollbar-thumb-hover-bg: rgba(139, 92, 246, 0.5);
+  --scrollbar-thumb-bg: rgba(217, 119, 87, 0.3);
+  --scrollbar-thumb-hover-bg: rgba(201, 100, 66, 0.5); /* accent-hover */
   --scrollbar-border-radius: 3px;
 }
 
@@ -106,15 +109,15 @@ body {
 }
 
 .chat-scrollbar::-webkit-scrollbar-thumb {
-  background: var(--scrollbar-thumb-bg, rgba(139, 92, 246, 0.3));
+  background: var(--scrollbar-thumb-bg, rgba(217, 119, 87, 0.3));
   border-radius: var(--scrollbar-border-radius, 3px);
 }
 
 .chat-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: var(--scrollbar-thumb-hover-bg, rgba(139, 92, 246, 0.5));
+  background: var(--scrollbar-thumb-hover-bg, rgba(201, 100, 66, 0.5));
 }
 
-/* 打字指示器动画 */
+/* 打字指示器动画 - 使用设计系统颜色 */
 .typing-indicator {
   display: flex;
   align-items: center;
@@ -124,7 +127,7 @@ body {
   height: 6px;
   width: 6px;
   margin: 0 1px;
-  background-color: #8b5cf6;
+  background-color: #d97757; /* accent color */
   border-radius: 50%;
   display: inline-block;
   opacity: 0.4;
@@ -213,18 +216,18 @@ body {
   to { transform: translateY(-1000px); }
 }
 
-/* DNA音乐页面特效样式 */
+/* DNA音乐页面特效样式 - 使用设计系统点缀色 */
 .constellation-progress {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 4px;
-  background: linear-gradient(90deg, #fbbf24, #a855f7, #3b82f6);
+  background: linear-gradient(90deg, #d97757, #c96442, #d97757, #c96442);
   transform-origin: left;
   transform: scaleX(0);
   z-index: 1000;
-  transition: transform 0.1s ease-out;
+  transition: transform 0.1s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .galaxy-bg {
@@ -236,11 +239,11 @@ body {
 }
 
 .stellar-text {
-  background: linear-gradient(135deg, #fbbf24, #f59e0b, #d97706);
+  background: linear-gradient(45deg, #d97757, #c96442, #d97757);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  text-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+  text-shadow: 0 0 30px rgba(217, 119, 87, 0.5);
 }
 
 .stellar-pulse {
@@ -287,7 +290,7 @@ body {
 .constellation-tag:hover {
   background: rgba(255, 255, 255, 0.2);
   transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+  box-shadow: 0 4px 12px rgba(217, 119, 87, 0.4);
 }
 
 .glowing-number {
@@ -357,8 +360,8 @@ body {
 
 .stellar-glow {
   box-shadow: 
-    0 0 30px rgba(255, 215, 0, 0.4),
-    0 0 60px rgba(138, 43, 226, 0.3),
+    0 0 30px rgba(217, 119, 87, 0.4),
+    0 0 60px rgba(201, 100, 66, 0.2),
     inset 0 0 30px rgba(255, 255, 255, 0.1);
 }
 
@@ -510,10 +513,35 @@ body {
 }
 
 @theme inline {
+  /* 字体 */
+  --font-sans: "source-han-serif-sc", "Noto Serif SC", serif, system-ui;
+  --font-serif: "source-han-serif-sc", "Noto Serif SC", Georgia, serif;
+  
+  /* 设计系统颜色 */
+  --color-primary-50: #faf9f5;
+  --color-primary-100: #f5f4ed;
+  --color-primary-950: #141413;
+  --color-accent: #d97757;
+  --color-accent-hover: #c96442;
+  
+  /* 流体间距 */
+  --spacing-section-sm: clamp(4rem, calc(4rem + 2 * ((100vw - 20rem) / 70)), 6rem);
+  --spacing-section-md: clamp(6rem, calc(6rem + 2 * ((100vw - 20rem) / 70)), 8rem);
+  --spacing-section-lg: clamp(8rem, calc(8rem + 4.5 * ((100vw - 20rem) / 70)), 12.5rem);
+  --spacing-section-xl: clamp(13rem, calc(13rem + 2 * ((100vw - 20rem) / 70)), 15rem);
+  
+  /* 圆角 */
+  --radius-xs: 0.25rem;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: 1rem;
+  
+  /* 动画缓动 */
+  --ease-expo-out: cubic-bezier(0.16, 1, 0.3, 1);
+  
+  /* 保留原有主题颜色 */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -526,8 +554,6 @@ body {
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-border: var(--border);
   --color-input: var(--input);
@@ -645,5 +671,22 @@ body {
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* 🎯 可访问性：尊重用户的动画偏好设置 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  /* 保留必要的动画（如加载指示器） */
+  .animate-spin {
+    animation-duration: 1s !important;
   }
 }

@@ -86,27 +86,27 @@ export async function loader({ request }: LoaderFunctionArgs) {
         title: "个人信息与隐私保护",
         content: `
           <div class="space-y-6">
-            <div class="bg-blue-50 p-6 rounded-2xl">
+            <div class="bg-primary-100 p-6 rounded-2xl">
               <h3>收集目的与范围</h3>
               <p>仅为基本访问、留言互动及改进站点体验，收集最小必要的浏览日志、IP、浏览器信息及用户主动填写的邮箱/昵称。</p>
             </div>
-            <div class="bg-blue-50 p-6 rounded-2xl">
+            <div class="bg-primary-100 p-6 rounded-2xl">
               <h3>Cookie/本地存储</h3>
               <p>仅使用必要 Cookie实现会话保持与语言偏好；非必要 Cookie 将征得明示同意后方可启用。</p>
             </div>
-            <div class="bg-blue-50 p-6 rounded-2xl">
+            <div class="bg-primary-100 p-6 rounded-2xl">
               <h3>保存期限</h3>
               <p>个人信息、日志最短保存 6 个月，最长不超过达成处理目的所必需的期限或法律法规要求的留存期。</p>
             </div>
-            <div class="bg-blue-50 p-6 rounded-2xl">
+            <div class="bg-primary-100 p-6 rounded-2xl">
               <h3>数据跨境</h3>
               <p>本站现无跨境传输；如未来需向境外服务器备份，将按照《数据出境安全评估办法》完成评估并告知用户。</p>
             </div>
-            <div class="bg-blue-50 p-6 rounded-2xl">
+            <div class="bg-primary-100 p-6 rounded-2xl">
               <h3>用户权利</h3>
               <p>用户可通过第十三条联系方式行使访问、更正、删除、撤回同意等权利；本站将在 15 个工作日内处理。</p>
             </div>
-            <div class="bg-blue-50 p-6 rounded-2xl">
+            <div class="bg-primary-100 p-6 rounded-2xl">
               <h3>未成年人保护</h3>
               <p>不主动面向未满 14 周岁未成年人收集个人信息；如需收集，将另行取得监护人同意并提供专门保护措施。</p>
             </div>
@@ -159,25 +159,25 @@ export async function loader({ request }: LoaderFunctionArgs) {
       {
         title: "联系我们",
         content: `
-          <div class="bg-blue-50 p-8 rounded-2xl border border-white/20">
+          <div class="bg-primary-100 p-8 rounded-2xl border border-primary-100/50">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <p class="flex items-center space-x-3 mb-4">
-                  <strong class="text-purple-300">运营者：</strong>
+                  <strong class="text-accent">运营者：</strong>
                   <span>汪家俊</span>
                 </p>
                 <p class="flex items-center space-x-3 mb-4">
-                  <strong class="text-purple-300">电子邮箱：</strong>
-                  <a href="mailto:wangjiajun@wangjiajun.asia" class="text-purple-400 hover:text-purple-300">wangjiajun@wangjiajun.asia</a>
+                  <strong class="text-accent">电子邮箱：</strong>
+                  <a href="mailto:wangjiajun@wangjiajun.asia" class="text-accent hover:text-accent-hover">wangjiajun@wangjiajun.asia</a>
                 </p>
               </div>
               <div>
                 <p class="flex items-center space-x-3 mb-4">
-                  <strong class="text-purple-300">电话：</strong>
+                  <strong class="text-accent">电话：</strong>
                   <span>(+86) 9999999999</span>
                 </p>
                 <p class="flex items-center space-x-3">
-                  <strong class="text-purple-300">通信地址：</strong>
+                  <strong class="text-accent">通信地址：</strong>
                   <span>山东省青岛市城阳区华贯路666号</span>
                 </p>
               </div>
@@ -253,16 +253,16 @@ export default function Terms() {
 
   return (
     <LazyMotion features={domAnimation}>
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
+    <div className="min-h-screen bg-primary-50 relative overflow-hidden">
       {/* Dynamic background effects */}
-      <div className="absolute inset-0 opacity-20">
-        <div className="absolute top-0 -left-4 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl animate-blob"></div>
-        <div className="absolute top-0 -right-4 w-72 h-72 bg-yellow-300 rounded-full mix-blend-multiply filter blur-xl animate-blob" style={{ animationDelay: '2s' }}></div>
-        <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl animate-blob" style={{ animationDelay: '4s' }}></div>
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute top-0 -left-4 w-72 h-72 bg-accent/20 rounded-full mix-blend-multiply filter blur-xl animate-blob"></div>
+        <div className="absolute top-0 -right-4 w-72 h-72 bg-accent/15 rounded-full mix-blend-multiply filter blur-xl animate-blob" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute -bottom-8 left-20 w-72 h-72 bg-accent/25 rounded-full mix-blend-multiply filter blur-xl animate-blob" style={{ animationDelay: '4s' }}></div>
       </div>
 
       {/* Grid background */}
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=60 height=60 viewBox=0 0 60 60 xmlns=http://www.w3.org/2000/svg%3E%3Cg fill=none fill-rule=evenodd%3E%3Cg fill=%239C92AC fill-opacity=0.05%3E%3Ccircle cx=30 cy=30 r=1/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')]"></div>
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=60 height=60 viewBox=0 0 60 60 xmlns=http://www.w3.org/2000/svg%3E%3Cg fill=none fill-rule=evenodd%3E%3Cg fill=%23d97757 fill-opacity=0.03%3E%3Ccircle cx=30 cy=30 r=1/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')]"></div>
 
       {/* Header */}
       <header className="relative z-10 pt-20 pb-16">
@@ -274,10 +274,10 @@ export default function Terms() {
             className="inline-block"
           >
             <div className="relative">
-              <h1 className="text-6xl md:text-7xl font-black bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent mb-4 tracking-tight">
+              <h1 className="text-6xl md:text-7xl font-black text-primary-950 mb-4 tracking-tight">
                 使用条款
               </h1>
-              <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg blur opacity-25 group-hover:opacity-75 transition duration-1000"></div>
+              <div className="absolute -inset-1 bg-accent/20 rounded-lg blur opacity-25 group-hover:opacity-75 transition duration-1000"></div>
             </div>
           </m.div>
           
@@ -287,15 +287,15 @@ export default function Terms() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="flex items-center justify-center space-x-4 mt-8"
           >
-            <div className="flex items-center space-x-2 bg-white/10 backdrop-blur-sm rounded-full px-6 py-3 border border-white/20">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-              <span className="text-white/90 font-medium">生效日期：{effectiveDate}</span>
+            <div className="flex items-center space-x-2 bg-primary-100 backdrop-blur-sm rounded-full px-6 py-3 border border-primary-100/50">
+              <div className="w-2 h-2 bg-accent rounded-full animate-pulse"></div>
+              <span className="text-primary-950 font-medium">生效日期：{effectiveDate}</span>
             </div>
           </m.div>
 
           {/* Decorative elements */}
-          <div className="absolute top-10 left-10 w-20 h-20 border border-purple-400/30 rounded-full animate-spin-slow"></div>
-          <div className="absolute top-32 right-20 w-16 h-16 border border-pink-400/30 rounded-full animate-bounce-slow"></div>
+          <div className="absolute top-10 left-10 w-20 h-20 border border-accent/20 rounded-full animate-spin-slow"></div>
+          <div className="absolute top-32 right-20 w-16 h-16 border border-accent/20 rounded-full animate-bounce-slow"></div>
         </div>
       </header>
 
@@ -310,14 +310,14 @@ export default function Terms() {
               transition={{ duration: 0.8, delay: 0.4 }}
               className="lg:sticky lg:top-8"
             >
-              <div className="bg-white/10 backdrop-blur-xl rounded-3xl border border-white/20 p-6 shadow-2xl">
+              <div className="bg-primary-100 backdrop-blur-xl rounded-3xl border border-primary-100/50 p-6 shadow-2xl">
                 <div className="flex items-center space-x-3 mb-8">
-                  <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+                  <div className="w-10 h-10 bg-accent rounded-xl flex items-center justify-center">
                     <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                   </div>
-                  <h2 className="text-2xl font-bold text-white">目录导航</h2>
+                  <h2 className="text-2xl font-bold text-primary-950">目录导航</h2>
                 </div>
                 
                 <nav className="space-y-2 max-h-[70vh] overflow-y-auto custom-scrollbar">
@@ -327,24 +327,24 @@ export default function Terms() {
                       onClick={() => scrollToSection(`section-${index + 1}`)}
                       className={`group flex items-center p-4 rounded-2xl transition-all duration-300 transform hover:scale-[1.02] w-full ${
                         activeSection === `section-${index + 1}` 
-                          ? 'bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-400/30 shadow-lg' 
-                          : 'hover:bg-white/10 border border-transparent'
+                          ? 'bg-accent/10 border border-accent/30 shadow-lg' 
+                          : 'hover:bg-primary-100/50 border border-transparent'
                       }`}
                     >
                       <div className="relative">
                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold transition-all duration-300 ${
                           activeSection === `section-${index + 1}` 
-                            ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg' 
-                            : 'bg-white/20 text-white/80 group-hover:bg-white/30'
+                            ? 'bg-accent text-white shadow-lg' 
+                            : 'bg-primary-100 text-primary-950/60 group-hover:bg-primary-100/80'
                         }`}>
                           {index + 1}
                         </div>
                         {activeSection === `section-${index + 1}` && (
-                          <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl blur opacity-30"></div>
+                          <div className="absolute -inset-1 bg-accent/30 rounded-xl blur opacity-30"></div>
                         )}
                       </div>
                       <span className={`ml-4 font-medium transition-colors duration-300 text-sm leading-relaxed text-left ${
-                        activeSection === `section-${index + 1}` ? 'text-white' : 'text-white/80 group-hover:text-white'
+                        activeSection === `section-${index + 1}` ? 'text-primary-950' : 'text-primary-950/70 group-hover:text-primary-950'
                       }`}>
                         {section.title}
                       </span>
@@ -361,7 +361,7 @@ export default function Terms() {
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.6 }}
-              className="bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 shadow-2xl overflow-hidden"
+              className="bg-primary-100 backdrop-blur-xl rounded-3xl border border-primary-100/50 shadow-2xl overflow-hidden"
             >
               <div className="p-8 lg:p-12">
                 <div className="space-y-16">
@@ -377,33 +377,33 @@ export default function Terms() {
                       <div className="relative mb-8">
                         <div className="flex items-center space-x-4 mb-6">
                           <div className="relative">
-                            <div className="w-14 h-14 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
+                            <div className="w-14 h-14 bg-accent rounded-2xl flex items-center justify-center shadow-lg">
                               <span className="text-white font-bold text-lg">{index + 1}</span>
                             </div>
-                            <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl blur opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
+                            <div className="absolute -inset-1 bg-accent/30 rounded-2xl blur opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
                           </div>
                           <div className="flex-1">
-                            <h2 className="text-3xl font-bold text-white mb-2 group-hover:text-purple-200 transition-colors duration-300">
+                            <h2 className="text-3xl font-bold text-primary-950 mb-2 group-hover:text-accent transition-colors duration-300">
                               {section.title}
                             </h2>
-                            <div className="h-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
+                            <div className="h-1 bg-accent rounded-full transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
                           </div>
                         </div>
                       </div>
                       
-                      <div className="prose prose-lg prose-invert max-w-none">
+                      <div className="prose prose-lg max-w-none">
                         <div 
                           dangerouslySetInnerHTML={{ __html: section.content }}
-                          className="text-white/90 leading-relaxed space-y-4 [&>p]:mb-4 [&>div]:space-y-4 [&_a]:text-purple-400 [&_a]:hover:text-purple-300 [&_a]:transition-colors [&_a]:duration-300 [&_strong]:text-white [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:text-purple-300 [&_h3]:mb-3 [&_.bg-blue-50]:bg-white/10 [&_.bg-blue-50]:backdrop-blur-sm [&_.bg-blue-50]:border [&_.bg-blue-50]:border-white/20 [&_.bg-blue-50]:rounded-2xl [&_.text-blue-700]:text-purple-300"
+                          className="text-primary-950/90 leading-relaxed space-y-4 [&>p]:mb-4 [&>div]:space-y-4 [&_a]:text-accent [&_a]:hover:text-accent-hover [&_a]:transition-colors [&_a]:duration-300 [&_strong]:text-primary-950 [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:text-accent [&_h3]:mb-3 [&_.bg-blue-50]:bg-primary-100 [&_.bg-blue-50]:backdrop-blur-sm [&_.bg-blue-50]:border [&_.bg-blue-50]:border-primary-100/50 [&_.bg-blue-50]:rounded-2xl [&_.text-blue-700]:text-accent [&_.text-purple-300]:text-accent [&_.text-purple-400]:text-accent"
                         />
                       </div>
                       
                       {/* Divider */}
                       {index < sections.length - 1 && (
                         <div className="mt-16 flex items-center">
-                          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
-                          <div className="mx-4 w-2 h-2 bg-white/30 rounded-full"></div>
-                          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+                          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-primary-950/10 to-transparent"></div>
+                          <div className="mx-4 w-2 h-2 bg-accent/30 rounded-full"></div>
+                          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-primary-950/10 to-transparent"></div>
                         </div>
                       )}
                     </section>
@@ -423,10 +423,10 @@ export default function Terms() {
           initial={{ opacity: 0, scale: 0 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, delay: 1 }}
-          className="group relative w-14 h-14 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-2xl shadow-2xl hover:shadow-purple-500/25 transform hover:scale-110 transition-all duration-300"
+          className="group relative w-14 h-14 bg-accent text-white rounded-2xl shadow-2xl hover:shadow-accent/25 transform hover:scale-110 transition-all duration-300"
           aria-label="返回顶部"
         >
-          <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl blur opacity-30 group-hover:opacity-75 transition duration-300"></div>
+          <div className="absolute -inset-1 bg-accent-hover rounded-2xl blur opacity-30 group-hover:opacity-75 transition duration-300"></div>
           <div className="relative flex items-center justify-center h-full">
             <svg className="w-6 h-6 transform group-hover:-translate-y-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 15l7-7 7 7" />
@@ -440,7 +440,7 @@ export default function Terms() {
           initial={{ opacity: 0, scale: 0 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, delay: 1.2 }}
-          className="group relative w-14 h-14 bg-white/10 backdrop-blur-sm text-white rounded-2xl border border-white/20 shadow-2xl hover:bg-white/20 transform hover:scale-110 transition-all duration-300"
+          className="group relative w-14 h-14 bg-primary-100 backdrop-blur-sm text-primary-950 rounded-2xl border border-primary-100/50 shadow-2xl hover:bg-primary-100/80 transform hover:scale-110 transition-all duration-300"
           aria-label="切换主题"
         >
           <div className="relative flex items-center justify-center h-full">
@@ -465,7 +465,7 @@ export default function Terms() {
           <Link
             to="/"
             prefetch="intent"
-            className="group relative w-14 h-14 bg-white/10 backdrop-blur-sm text-white rounded-2xl border border-white/20 shadow-2xl hover:bg-white/20 transform hover:scale-110 transition-all duration-300 flex items-center justify-center"
+            className="group relative w-14 h-14 bg-primary-100 backdrop-blur-sm text-primary-950 rounded-2xl border border-primary-100/50 shadow-2xl hover:bg-primary-100/80 transform hover:scale-110 transition-all duration-300 flex items-center justify-center"
             aria-label="返回首页"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -476,9 +476,9 @@ export default function Terms() {
       </div>
 
       {/* Progress indicator */}
-      <div className="fixed top-0 left-0 w-full h-1 bg-black/20 z-50">
+      <div className="fixed top-0 left-0 w-full h-1 bg-primary-100/50 z-50">
         <div 
-          className="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-300 ease-out"
+          className="h-full bg-accent transition-all duration-300 ease-out"
           style={{ width: `${scrollProgress}%` }}
         />
       </div>
@@ -492,20 +492,20 @@ export default function Terms() {
 // Error Boundary as required by ruler2.md
 export function ErrorBoundary() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
-      <div className="bg-white/10 backdrop-blur-xl rounded-3xl border border-white/20 p-8 shadow-2xl max-w-md w-full mx-4">
+    <div className="min-h-screen bg-primary-50 flex items-center justify-center">
+      <div className="bg-primary-100 backdrop-blur-xl rounded-3xl border border-primary-100/50 p-8 shadow-2xl max-w-md w-full mx-4">
         <div className="text-center">
-          <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-primary-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-white mb-2">页面加载出错</h1>
-          <p className="text-white/70 mb-6">抱歉，使用条款页面暂时无法显示。请稍后再试。</p>
+          <h1 className="text-2xl font-bold text-primary-950 mb-2">页面加载出错</h1>
+          <p className="text-primary-950/70 mb-6">抱歉，使用条款页面暂时无法显示。请稍后再试。</p>
           <Link
             to="/"
             prefetch="intent"
-            className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-xl font-medium hover:shadow-lg transform hover:scale-105 transition-all duration-300 inline-block"
+            className="bg-accent text-white px-6 py-3 rounded-xl font-medium hover:bg-accent-hover hover:shadow-lg transform hover:scale-105 transition-all duration-300 inline-block"
           >
             返回首页
           </Link>

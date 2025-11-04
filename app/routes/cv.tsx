@@ -306,12 +306,12 @@ export default function CVPage() {
 
   return (
     <LazyMotion features={domAnimation}>
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 font-sans">
+    <div className="min-h-screen bg-primary-50 font-sans">
       <div className="max-w-4xl mx-auto p-6 lg:p-8">
         
         {/* 页面标题和头像 */}
         <m.div 
-          className="bg-white rounded-2xl shadow-xl p-8 mb-8 border border-gray-100"
+          className="bg-primary-100 rounded-2xl shadow-xl p-8 mb-8"
           initial={{ opacity: 0, y: -30 }}
           animate={{ 
             opacity: animationStage >= 1 ? 1 : 0,
@@ -334,7 +334,7 @@ export default function CVPage() {
                 src={avatarImage.src}
                 alt={content.personal.photo_alt}
                 onError={() => console.error('Image failed to load:', avatarImage.src)}
-                className="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover shadow-lg border-4 border-white"
+                className="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover shadow-lg border-4 border-primary-50"
                 loading="eager"
                 decoding="async"
               />
@@ -343,7 +343,7 @@ export default function CVPage() {
             {/* 基本信息 */}
             <div className="flex-1 text-center md:text-left">
               <m.h1 
-                className="text-3xl md:text-4xl font-bold text-gray-800 mb-2"
+                className="text-3xl md:text-4xl font-bold text-primary-950 mb-2"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ 
                   opacity: animationStage >= 1 ? 1 : 0,
@@ -354,7 +354,7 @@ export default function CVPage() {
                 {content.personal.name}
               </m.h1>
               <m.p 
-                className="text-lg text-gray-600 mb-4"
+                className="text-lg text-primary-950/70 mb-4"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ 
                   opacity: animationStage >= 1 ? 1 : 0,
@@ -365,7 +365,7 @@ export default function CVPage() {
                 {content.personal.age}
               </m.p>
               <m.div 
-                className="flex flex-col md:flex-row gap-4 text-sm text-gray-700"
+                className="flex flex-col md:flex-row gap-4 text-sm text-primary-950"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ 
                   opacity: animationStage >= 1 ? 1 : 0,
@@ -374,11 +374,11 @@ export default function CVPage() {
                 transition={{ duration: 0.6, delay: 0.5 }}
               >
                 <div className="flex items-center gap-2">
-                  <span className="w-4 h-4 text-blue-500 flex items-center justify-center">💼</span>
+                  <span className="w-4 h-4 text-accent flex items-center justify-center">💼</span>
                   <span>{content.personal.job_intention}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="w-4 h-4 text-green-500 flex items-center justify-center">📍</span>
+                  <span className="w-4 h-4 text-accent flex items-center justify-center">📍</span>
                   <span>{content.personal.expected_location}</span>
                 </div>
               </m.div>
@@ -393,7 +393,7 @@ export default function CVPage() {
             
             {/* 工作经历 */}
             <m.div 
-              className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100"
+              className="bg-primary-100 rounded-2xl shadow-lg p-6"
               initial={{ opacity: 0, x: -30 }}
               animate={{ 
                 opacity: animationStage >= 3 ? 1 : 0,
@@ -402,64 +402,64 @@ export default function CVPage() {
               transition={{ duration: 0.8, delay: 0.1 }}
             >
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <span className="w-6 h-6 text-blue-600 flex items-center justify-center text-lg">💼</span>
+                <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center">
+                  <span className="w-6 h-6 text-accent flex items-center justify-center text-lg">💼</span>
                 </div>
-                <h2 className="text-xl font-bold text-gray-800">{content.work_experience.title}</h2>
+                <h2 className="text-xl font-bold text-primary-950">{content.work_experience.title}</h2>
               </div>
               
               <div className="space-y-6">
-                <div className="border-l-4 border-blue-500 pl-6">
+                <div className="border-l-4 border-accent pl-6">
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-3">
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-800">{content.work_experience.tencent.company}</h3>
-                      <p className="text-blue-600 font-medium">{content.work_experience.tencent.position}</p>
-                      <p className="text-sm text-gray-600">{content.work_experience.tencent.department}</p>
+                      <h3 className="text-lg font-semibold text-primary-950">{content.work_experience.tencent.company}</h3>
+                      <p className="text-accent font-medium">{content.work_experience.tencent.position}</p>
+                      <p className="text-sm text-primary-950/70">{content.work_experience.tencent.department}</p>
                     </div>
-                    <span className="text-sm text-gray-500 mt-2 md:mt-0">{content.work_experience.tencent.duration}</span>
+                    <span className="text-sm text-primary-950/70 mt-2 md:mt-0">{content.work_experience.tencent.duration}</span>
                   </div>
                   
                   <div className="space-y-4">
                     <div>
-                      <p className="text-gray-700 mb-3">{content.work_experience.tencent.description_1}</p>
+                      <p className="text-primary-950 mb-3">{content.work_experience.tencent.description_1}</p>
                       <ul className="space-y-2">
                         <li className="flex items-start gap-2">
-                          <CheckCircleIcon className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                          <span className="text-sm text-gray-600">{content.work_experience.tencent.responsibilities_1.quality_check}</span>
+                          <CheckCircleIcon className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
+                          <span className="text-sm text-primary-950/70">{content.work_experience.tencent.responsibilities_1.quality_check}</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <CheckCircleIcon className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                          <span className="text-sm text-gray-600">{content.work_experience.tencent.responsibilities_1.complaint_review}</span>
+                          <CheckCircleIcon className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
+                          <span className="text-sm text-primary-950/70">{content.work_experience.tencent.responsibilities_1.complaint_review}</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <CheckCircleIcon className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                          <span className="text-sm text-gray-600">{content.work_experience.tencent.responsibilities_1.violation_review}</span>
+                          <CheckCircleIcon className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
+                          <span className="text-sm text-primary-950/70">{content.work_experience.tencent.responsibilities_1.violation_review}</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <CheckCircleIcon className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                          <span className="text-sm text-gray-600">{content.work_experience.tencent.responsibilities_1.patrol_inspection}</span>
+                          <CheckCircleIcon className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
+                          <span className="text-sm text-primary-950/70">{content.work_experience.tencent.responsibilities_1.patrol_inspection}</span>
                         </li>
                       </ul>
                     </div>
                     
                     <div>
-                      <p className="text-gray-700 mb-3">{content.work_experience.tencent.description_2}</p>
+                      <p className="text-primary-950 mb-3">{content.work_experience.tencent.description_2}</p>
                       <ul className="space-y-2">
                         <li className="flex items-start gap-2">
-                          <CheckCircleIcon className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                          <span className="text-sm text-gray-600">{content.work_experience.tencent.responsibilities_2.queue_management}</span>
+                          <CheckCircleIcon className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
+                          <span className="text-sm text-primary-950/70">{content.work_experience.tencent.responsibilities_2.queue_management}</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <CheckCircleIcon className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                          <span className="text-sm text-gray-600">{content.work_experience.tencent.responsibilities_2.daily_quality_check}</span>
+                          <CheckCircleIcon className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
+                          <span className="text-sm text-primary-950/70">{content.work_experience.tencent.responsibilities_2.daily_quality_check}</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <CheckCircleIcon className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                          <span className="text-sm text-gray-600">{content.work_experience.tencent.responsibilities_2.rule_learning}</span>
+                          <CheckCircleIcon className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
+                          <span className="text-sm text-primary-950/70">{content.work_experience.tencent.responsibilities_2.rule_learning}</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <CheckCircleIcon className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                          <span className="text-sm text-gray-600">{content.work_experience.tencent.responsibilities_2.ai_tools}</span>
+                          <CheckCircleIcon className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
+                          <span className="text-sm text-primary-950/70">{content.work_experience.tencent.responsibilities_2.ai_tools}</span>
                         </li>
                       </ul>
                     </div>
@@ -470,7 +470,7 @@ export default function CVPage() {
 
             {/* 在校经历 */}
             <m.div 
-              className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100"
+              className="bg-primary-100 rounded-2xl shadow-lg p-6"
               initial={{ opacity: 0, x: -30 }}
               animate={{ 
                 opacity: animationStage >= 3 ? 1 : 0,
@@ -479,32 +479,32 @@ export default function CVPage() {
               transition={{ duration: 0.8, delay: 0.2 }}
             >
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <UserGroupIcon className="w-6 h-6 text-purple-600" />
+                <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center">
+                  <UserGroupIcon className="w-6 h-6 text-accent" />
                 </div>
-                <h2 className="text-xl font-bold text-gray-800">{content.school_experience.title}</h2>
+                <h2 className="text-xl font-bold text-primary-950">{content.school_experience.title}</h2>
               </div>
               
-              <div className="border-l-4 border-purple-500 pl-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">{content.school_experience.practice.title}</h3>
-                <p className="text-purple-600 font-medium mb-4">{content.school_experience.practice.hospital}</p>
+              <div className="border-l-4 border-accent pl-6">
+                <h3 className="text-lg font-semibold text-primary-950 mb-2">{content.school_experience.practice.title}</h3>
+                <p className="text-accent font-medium mb-4">{content.school_experience.practice.hospital}</p>
                 
                 <ul className="space-y-2">
                   <li className="flex items-start gap-2">
-                    <CheckCircleIcon className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm text-gray-600">{content.school_experience.practice.activities.medical_learning}</span>
+                    <CheckCircleIcon className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
+                    <span className="text-sm text-primary-950/70">{content.school_experience.practice.activities.medical_learning}</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <CheckCircleIcon className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm text-gray-600">{content.school_experience.practice.activities.nursing_learning}</span>
+                    <CheckCircleIcon className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
+                    <span className="text-sm text-primary-950/70">{content.school_experience.practice.activities.nursing_learning}</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <CheckCircleIcon className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm text-gray-600">{content.school_experience.practice.activities.patient_communication}</span>
+                    <CheckCircleIcon className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
+                    <span className="text-sm text-primary-950/70">{content.school_experience.practice.activities.patient_communication}</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <CheckCircleIcon className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm text-gray-600">{content.school_experience.practice.activities.meeting_participation}</span>
+                    <CheckCircleIcon className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
+                    <span className="text-sm text-primary-950/70">{content.school_experience.practice.activities.meeting_participation}</span>
                   </li>
                 </ul>
               </div>
@@ -516,7 +516,7 @@ export default function CVPage() {
             
             {/* 教育背景 */}
             <m.div 
-              className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100"
+              className="bg-primary-100 rounded-2xl shadow-lg p-6"
               initial={{ opacity: 0, x: 30 }}
               animate={{ 
                 opacity: animationStage >= 4 ? 1 : 0,
@@ -525,21 +525,21 @@ export default function CVPage() {
               transition={{ duration: 0.8, delay: 0.1 }}
             >
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                  <AcademicCapIcon className="w-6 h-6 text-green-600" />
+                <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center">
+                  <AcademicCapIcon className="w-6 h-6 text-accent" />
                 </div>
-                <h2 className="text-xl font-bold text-gray-800">{content.education.title}</h2>
+                <h2 className="text-xl font-bold text-primary-950">{content.education.title}</h2>
               </div>
               
               <div className="space-y-3">
-                <h3 className="text-lg font-semibold text-gray-800">{content.education.university}</h3>
-                <p className="text-green-600 font-medium">{content.education.major}</p>
+                <h3 className="text-lg font-semibold text-primary-950">{content.education.university}</h3>
+                <p className="text-accent font-medium">{content.education.major}</p>
               </div>
             </m.div>
 
             {/* 职业技能 */}
             <m.div 
-              className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100"
+              className="bg-primary-100 rounded-2xl shadow-lg p-6"
               initial={{ opacity: 0, x: 30 }}
               animate={{ 
                 opacity: animationStage >= 4 ? 1 : 0,
@@ -548,10 +548,10 @@ export default function CVPage() {
               transition={{ duration: 0.8, delay: 0.2 }}
             >
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                  <WrenchScrewdriverIcon className="w-6 h-6 text-orange-600" />
+                <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center">
+                  <WrenchScrewdriverIcon className="w-6 h-6 text-accent" />
                 </div>
-                <h2 className="text-xl font-bold text-gray-800">{content.skills.title}</h2>
+                <h2 className="text-xl font-bold text-primary-950">{content.skills.title}</h2>
               </div>
               
               <div className="space-y-4">
@@ -568,14 +568,14 @@ export default function CVPage() {
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <skill.icon className="w-4 h-4 text-gray-500" />
-                        <span className="text-sm font-medium text-gray-700">{skill.name}</span>
+                        <skill.icon className="w-4 h-4 text-primary-950/70" />
+                        <span className="text-sm font-medium text-primary-950">{skill.name}</span>
                       </div>
-                      <span className="text-xs text-gray-500">{skill.level}</span>
+                      <span className="text-xs text-primary-950/70">{skill.level}</span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="w-full bg-primary-50 rounded-full h-2">
                       <m.div 
-                        className="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full"
+                        className="bg-accent h-2 rounded-full"
                         initial={{ width: 0 }}
                         animate={{ 
                           width: animationStage >= 4 ? `${skill.progress}%` : 0 
@@ -590,7 +590,7 @@ export default function CVPage() {
 
             {/* 资格证书 */}
             <m.div 
-              className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100"
+              className="bg-primary-100 rounded-2xl shadow-lg p-6"
               initial={{ opacity: 0, x: 30 }}
               animate={{ 
                 opacity: animationStage >= 4 ? 1 : 0,
@@ -599,21 +599,21 @@ export default function CVPage() {
               transition={{ duration: 0.8, delay: 0.3 }}
             >
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
-                  <TrophyIcon className="w-6 h-6 text-yellow-600" />
+                <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center">
+                  <TrophyIcon className="w-6 h-6 text-accent" />
                 </div>
-                <h2 className="text-xl font-bold text-gray-800">{content.certificates.title}</h2>
+                <h2 className="text-xl font-bold text-primary-950">{content.certificates.title}</h2>
               </div>
               
               <div className="flex items-center gap-2">
-                <CheckCircleIcon className="w-5 h-5 text-green-500" />
-                <span className="text-gray-700">{content.certificates.cet6}</span>
+                <CheckCircleIcon className="w-5 h-5 text-accent" />
+                <span className="text-primary-950">{content.certificates.cet6}</span>
               </div>
             </m.div>
 
             {/* 兴趣爱好 */}
             <m.div 
-              className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100"
+              className="bg-primary-100 rounded-2xl shadow-lg p-6"
               initial={{ opacity: 0, x: 30 }}
               animate={{ 
                 opacity: animationStage >= 4 ? 1 : 0,
@@ -622,20 +622,20 @@ export default function CVPage() {
               transition={{ duration: 0.8, delay: 0.4 }}
             >
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-pink-100 rounded-lg flex items-center justify-center">
-                  <HeartIcon className="w-6 h-6 text-pink-600" />
+                <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center">
+                  <HeartIcon className="w-6 h-6 text-accent" />
                 </div>
-                <h2 className="text-xl font-bold text-gray-800">{content.hobbies.title}</h2>
+                <h2 className="text-xl font-bold text-primary-950">{content.hobbies.title}</h2>
               </div>
               
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
                   <span className="text-2xl">🎮</span>
-                  <span className="text-gray-700">{content.hobbies.gaming}</span>
+                  <span className="text-primary-950">{content.hobbies.gaming}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-2xl">🚴</span>
-                  <span className="text-gray-700">{content.hobbies.cycling}</span>
+                  <span className="text-primary-950">{content.hobbies.cycling}</span>
                 </div>
               </div>
             </m.div>
@@ -644,7 +644,7 @@ export default function CVPage() {
 
         {/* 自我评价 */}
         <m.div 
-          className="bg-white rounded-2xl shadow-lg p-8 mt-8 border border-gray-100"
+          className="bg-primary-100 rounded-2xl shadow-lg p-8 mt-8"
           initial={{ opacity: 0, y: 30 }}
           animate={{ 
             opacity: animationStage >= 5 ? 1 : 0,
@@ -653,13 +653,13 @@ export default function CVPage() {
           transition={{ duration: 0.8, delay: 0.1 }}
         >
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
-              <UserIcon className="w-6 h-6 text-indigo-600" />
+            <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center">
+              <UserIcon className="w-6 h-6 text-accent" />
             </div>
-            <h2 className="text-xl font-bold text-gray-800">{content.self_evaluation.title}</h2>
+            <h2 className="text-xl font-bold text-primary-950">{content.self_evaluation.title}</h2>
           </div>
           
-          <p className="text-gray-700 leading-relaxed">{content.self_evaluation.content}</p>
+          <p className="text-base leading-relaxed text-primary-950">{content.self_evaluation.content}</p>
         </m.div>
 
         {/* 返回首页链接 */}
@@ -667,7 +667,7 @@ export default function CVPage() {
           <Link
             to="/"
             prefetch="intent"
-            className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-full hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+            className="inline-flex items-center gap-2 bg-accent text-white px-6 py-3 rounded font-medium hover:bg-accent-hover transition-all duration-300 ease-expo-out shadow-lg hover:shadow-xl hover:-translate-y-0.5"
           >
             ← 返回首页
           </Link>
@@ -680,19 +680,19 @@ export default function CVPage() {
 
 export function ErrorBoundary() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-400 via-pink-500 to-purple-600 flex items-center justify-center">
-      <div className="bg-white/10 backdrop-blur-lg p-8 rounded-lg shadow-lg max-w-md w-full mx-4 border border-white/20">
+    <div className="min-h-screen bg-primary-50 flex items-center justify-center">
+      <div className="bg-primary-100 p-8 rounded-lg shadow-lg max-w-md w-full mx-4">
         <div className="text-center">
-          <div className="w-16 h-16 bg-red-100/20 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
             </svg>
           </div>
-          <h1 className="text-xl font-semibold text-white mb-2">简历页面错误</h1>
-          <p className="text-white/70 mb-4">抱歉，个人简历页面暂时无法显示。</p>
+          <h1 className="text-xl font-semibold text-primary-950 mb-2">简历页面错误</h1>
+          <p className="text-base leading-relaxed text-primary-950/70 mb-4">抱歉，个人简历页面暂时无法显示。</p>
           <Link
             to="/"
-            className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded transition-colors inline-block"
+            className="bg-accent hover:bg-accent-hover text-white px-4 py-2 rounded font-medium transition-colors duration-300 ease-expo-out inline-block"
           >
             返回首页
           </Link>
