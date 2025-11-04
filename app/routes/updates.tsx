@@ -207,8 +207,9 @@ function UpdateCard({ update, index }: { update: UpdateLog; index: number }) {
   return (
     <article
       className={`
-        bg-primary-100 rounded-lg p-2 mb-2
-        transition-all duration-300 ease-expo-out
+        bg-primary-100 rounded-lg p-2.5 mb-3
+        transition-[transform,opacity] duration-600 ease-expo-out
+        hover:transition-[transform,box-shadow] hover:duration-300
         hover:-translate-y-1 hover:shadow-2xl
         ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}
       `}
@@ -217,27 +218,27 @@ function UpdateCard({ update, index }: { update: UpdateLog; index: number }) {
       }}
       suppressHydrationWarning
     >
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-3">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1 mb-2">
         <div className="flex-1">
-          <div className="flex items-center gap-3 mb-2">
-            <h3 className="text-3xl font-semibold leading-tight tracking-tight text-primary-950">
+          <div className="flex items-center gap-0.75 mb-0.5">
+            <h3 className="text-2xl font-bold leading-tight tracking-tight text-primary-950">
               {update.version}
             </h3>
             <span className={`
-              rounded-xs px-2 py-0.5 text-xs font-semibold
+              rounded-xs px-0.75 py-0.25 text-xs font-semibold uppercase tracking-wider
               ${typeStyles.bg} ${typeStyles.text}
             `}>
               {typeStyles.label}
             </span>
           </div>
-          <p className="text-sm font-medium text-primary-950/70 mb-1">
+          <p className="text-sm font-normal text-primary-950/70">
             {formatDate(update.date)}
           </p>
         </div>
       </div>
 
-      <div className="mb-3">
-        <h4 className="text-xl font-semibold text-primary-950 mb-2">
+      <div className="mb-1.5">
+        <h4 className="text-xl font-semibold leading-snug text-primary-950 mb-0.75">
           {update.title}
         </h4>
         <p className="text-base leading-relaxed text-primary-950/80">
@@ -245,13 +246,13 @@ function UpdateCard({ update, index }: { update: UpdateLog; index: number }) {
         </p>
       </div>
 
-      <ul className="space-y-2">
+      <ul className="space-y-0.75">
         {update.items.map((item, itemIndex) => (
           <li
             key={itemIndex}
-            className="flex items-start gap-2 text-base leading-relaxed text-primary-950/70"
+            className="flex items-start gap-0.5 text-base leading-relaxed text-primary-950/70"
           >
-            <span className="text-accent mt-1.5 flex-shrink-0">•</span>
+            <span className="text-accent mt-0.5 flex-shrink-0">•</span>
             <span>{item}</span>
           </li>
         ))}
@@ -268,20 +269,20 @@ export default function Updates() {
     <div className="min-h-screen bg-primary-50">
       <Header />
       
-      <main className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8">
+      <main className="max-w-[74.5rem] mx-auto px-1.5 sm:px-2 lg:px-2.5">
         {/* Hero Section */}
         <section className="py-section-md">
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold leading-tight tracking-tight text-primary-950 mb-4">
+          <div className="text-center mb-4">
+            <h1 className="text-4xl font-bold leading-tight tracking-tight text-primary-950 mb-1">
               更新日志
             </h1>
-            <p className="text-base leading-relaxed text-primary-950/70 max-w-2xl mx-auto">
-              查看项目的最新更新和版本发布记录，了解我们持续改进的功能和修复
+            <p className="text-base leading-relaxed text-primary-950/70 max-w-[60rem] mx-auto">
+              查看项目的最新更新和版本发布记录,了解我们持续改进的功能和修复
             </p>
           </div>
 
           {/* Updates List */}
-          <div className="space-y-6">
+          <div className="space-y-3 max-w-[60rem] mx-auto">
             {updates.map((update, index) => (
               <UpdateCard key={update.id} update={update} index={index} />
             ))}
@@ -289,15 +290,16 @@ export default function Updates() {
         </section>
 
         {/* Back to home link */}
-        <div className="text-center py-8 pb-section-md">
+        <div className="text-center py-2.5 pb-section-md">
           <Link
             to="/"
             prefetch="intent"
             className="
-              inline-flex items-center gap-2
+              inline-flex items-center gap-0.5
               text-accent hover:text-accent-hover
               text-sm font-medium
-              transition-colors duration-300 ease-expo-out
+              transition-[color,transform] duration-300 ease-expo-out
+              hover:-translate-y-0.5
             "
           >
             <span>←</span>
@@ -317,18 +319,18 @@ export function ErrorBoundary() {
   
   if (isRouteErrorResponse(error)) {
     return (
-      <div className="min-h-screen bg-primary-50 flex items-center justify-center px-4">
-        <div className="bg-primary-100 rounded-lg p-8 max-w-md w-full text-center">
-          <div className="mb-6">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
+      <div className="min-h-screen bg-primary-50 flex items-center justify-center px-1.5">
+        <div className="bg-primary-100 rounded-lg p-2.5 max-w-md w-full text-center">
+          <div className="mb-2.5">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-1.5">
               <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
             </div>
-            <h2 className="text-2xl font-bold text-primary-950 mb-2">
+            <h2 className="text-2xl font-bold leading-tight text-primary-950 mb-0.75">
               {error.status === 404 ? '页面未找到' : '出现错误'}
             </h2>
-            <p className="text-base leading-relaxed text-primary-950/70 mb-6">
+            <p className="text-base leading-relaxed text-primary-950/70 mb-2.5">
               {error.status === 404 
                 ? '抱歉，您访问的页面不存在。' 
                 : `错误代码: ${error.status || 500}`}
@@ -336,9 +338,11 @@ export function ErrorBoundary() {
             <Link
               to="/"
               className="
-                inline-block bg-accent text-white px-6 py-3 rounded font-medium
+                inline-block bg-accent text-white px-1.5 py-0.75 rounded font-medium
                 hover:bg-accent-hover
-                transition-colors duration-300 ease-expo-out
+                transition-[background-color,transform,box-shadow] duration-300 ease-expo-out
+                hover:-translate-y-0.5 hover:shadow-lg
+                active:translate-y-0 active:shadow-sm
               "
             >
               返回首页
@@ -351,25 +355,27 @@ export function ErrorBoundary() {
 
   // 未知错误
   return (
-    <div className="min-h-screen bg-primary-50 flex items-center justify-center px-4">
-      <div className="bg-primary-100 rounded-lg p-8 max-w-md w-full text-center">
-        <div className="mb-6">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
+    <div className="min-h-screen bg-primary-50 flex items-center justify-center px-1.5">
+      <div className="bg-primary-100 rounded-lg p-2.5 max-w-md w-full text-center">
+        <div className="mb-2.5">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-1.5">
             <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
           </div>
-          <h2 className="text-2xl font-bold text-primary-950 mb-2">出现错误</h2>
-          <p className="text-base leading-relaxed text-primary-950/70 mb-6">
-            更新日志页面加载失败，请稍后重试。
+          <h2 className="text-2xl font-bold leading-tight text-primary-950 mb-0.75">出现错误</h2>
+          <p className="text-base leading-relaxed text-primary-950/70 mb-2.5">
+            更新日志页面加载失败,请稍后重试。
           </p>
-          <div className="flex gap-4 justify-center">
+          <div className="flex gap-1 justify-center">
             <button
               onClick={() => window.location.reload()}
               className="
-                bg-accent text-white px-6 py-3 rounded font-medium
+                bg-accent text-white px-1.5 py-0.75 rounded font-medium
                 hover:bg-accent-hover
-                transition-colors duration-300 ease-expo-out
+                transition-[background-color,transform,box-shadow] duration-300 ease-expo-out
+                hover:-translate-y-0.5 hover:shadow-lg
+                active:translate-y-0 active:shadow-sm
               "
             >
               刷新页面
@@ -377,9 +383,11 @@ export function ErrorBoundary() {
             <Link
               to="/"
               className="
-                bg-primary-100 text-primary-950 px-6 py-3 rounded font-medium
+                bg-primary-100 text-primary-950 px-1.5 py-0.75 rounded font-medium
                 hover:bg-primary-100/80
-                transition-colors duration-300 ease-expo-out
+                transition-[background-color,transform,box-shadow] duration-300 ease-expo-out
+                hover:-translate-y-0.5 hover:shadow-lg
+                active:translate-y-0 active:shadow-sm
               "
             >
               返回首页

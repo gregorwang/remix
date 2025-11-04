@@ -307,19 +307,19 @@ export default function CVPage() {
   return (
     <LazyMotion features={domAnimation}>
     <div className="min-h-screen bg-primary-50 font-sans">
-      <div className="max-w-4xl mx-auto p-6 lg:p-8">
+      <div className="max-w-4xl mx-auto px-4 py-6 md:px-6 lg:px-8">
         
         {/* 页面标题和头像 */}
         <m.div 
-          className="bg-primary-100 rounded-2xl shadow-xl p-8 mb-8"
+          className="bg-primary-100 rounded-lg shadow-xl p-6 md:p-8 mb-6"
           initial={{ opacity: 0, y: -30 }}
           animate={{ 
             opacity: animationStage >= 1 ? 1 : 0,
             y: animationStage >= 1 ? 0 : -30 
           }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
         >
-          <div className="flex flex-col md:flex-row items-center gap-8">
+          <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8">
             {/* 头像 */}
             <m.div 
               className="flex-shrink-0"
@@ -328,7 +328,7 @@ export default function CVPage() {
                 scale: animationStage >= 1 ? 1 : 0.8,
                 opacity: animationStage >= 1 ? 1 : 0 
               }}
-              transition={{ duration: 0.6, delay: 0.2 }}
+              transition={{ duration: 0.6, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
             >
               <img 
                 src={avatarImage.src}
@@ -343,42 +343,42 @@ export default function CVPage() {
             {/* 基本信息 */}
             <div className="flex-1 text-center md:text-left">
               <m.h1 
-                className="text-3xl md:text-4xl font-bold text-primary-950 mb-2"
+                className="text-4xl font-bold text-primary-950 leading-tight tracking-tight mb-1"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ 
                   opacity: animationStage >= 1 ? 1 : 0,
                   x: animationStage >= 1 ? 0 : -20 
                 }}
-                transition={{ duration: 0.6, delay: 0.3 }}
+                transition={{ duration: 0.6, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
               >
                 {content.personal.name}
               </m.h1>
               <m.p 
-                className="text-lg text-primary-950/70 mb-4"
+                className="text-lg text-primary-950/70 leading-normal mb-3"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ 
                   opacity: animationStage >= 1 ? 1 : 0,
                   x: animationStage >= 1 ? 0 : -20 
                 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
+                transition={{ duration: 0.6, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
               >
                 {content.personal.age}
               </m.p>
               <m.div 
-                className="flex flex-col md:flex-row gap-4 text-sm text-primary-950"
+                className="flex flex-col md:flex-row gap-3 text-sm font-medium text-primary-950"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ 
                   opacity: animationStage >= 1 ? 1 : 0,
                   y: animationStage >= 1 ? 0 : 10 
                 }}
-                transition={{ duration: 0.6, delay: 0.5 }}
+                transition={{ duration: 0.6, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
               >
-                <div className="flex items-center gap-2">
-                  <span className="w-4 h-4 text-accent flex items-center justify-center">💼</span>
+                <div className="flex items-center justify-center md:justify-start gap-2">
+                  <span className="text-base text-accent flex items-center justify-center">💼</span>
                   <span>{content.personal.job_intention}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="w-4 h-4 text-accent flex items-center justify-center">📍</span>
+                <div className="flex items-center justify-center md:justify-start gap-2">
+                  <span className="text-base text-accent flex items-center justify-center">📍</span>
                   <span>{content.personal.expected_location}</span>
                 </div>
               </m.div>
@@ -386,80 +386,80 @@ export default function CVPage() {
           </div>
         </m.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
           {/* 左侧：工作经历和教育背景 */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="lg:col-span-2 space-y-6">
             
             {/* 工作经历 */}
             <m.div 
-              className="bg-primary-100 rounded-2xl shadow-lg p-6"
+              className="bg-primary-100 rounded-lg shadow-lg p-6"
               initial={{ opacity: 0, x: -30 }}
               animate={{ 
                 opacity: animationStage >= 3 ? 1 : 0,
                 x: animationStage >= 3 ? 0 : -30 
               }}
-              transition={{ duration: 0.8, delay: 0.1 }}
+              transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
             >
-              <div className="flex items-center gap-3 mb-6">
+              <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center">
-                  <span className="w-6 h-6 text-accent flex items-center justify-center text-lg">💼</span>
+                  <span className="text-xl text-accent flex items-center justify-center">💼</span>
                 </div>
-                <h2 className="text-xl font-bold text-primary-950">{content.work_experience.title}</h2>
+                <h2 className="text-2xl font-bold text-primary-950 leading-snug">{content.work_experience.title}</h2>
               </div>
               
-              <div className="space-y-6">
-                <div className="border-l-4 border-accent pl-6">
-                  <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-3">
+              <div className="space-y-4">
+                <div className="border-l-4 border-accent pl-4">
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-2">
                     <div>
-                      <h3 className="text-lg font-semibold text-primary-950">{content.work_experience.tencent.company}</h3>
-                      <p className="text-accent font-medium">{content.work_experience.tencent.position}</p>
-                      <p className="text-sm text-primary-950/70">{content.work_experience.tencent.department}</p>
+                      <h3 className="text-xl font-semibold text-primary-950 leading-snug">{content.work_experience.tencent.company}</h3>
+                      <p className="text-base text-accent font-medium leading-normal mt-0.5">{content.work_experience.tencent.position}</p>
+                      <p className="text-sm text-primary-950/70 leading-normal">{content.work_experience.tencent.department}</p>
                     </div>
-                    <span className="text-sm text-primary-950/70 mt-2 md:mt-0">{content.work_experience.tencent.duration}</span>
+                    <span className="text-sm text-primary-950/70 leading-normal mt-1 md:mt-0">{content.work_experience.tencent.duration}</span>
                   </div>
                   
-                  <div className="space-y-4">
+                  <div className="space-y-3 mt-3">
                     <div>
-                      <p className="text-primary-950 mb-3">{content.work_experience.tencent.description_1}</p>
-                      <ul className="space-y-2">
+                      <p className="text-base text-primary-950 leading-relaxed mb-2">{content.work_experience.tencent.description_1}</p>
+                      <ul className="space-y-1.5">
                         <li className="flex items-start gap-2">
                           <CheckCircleIcon className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
-                          <span className="text-sm text-primary-950/70">{content.work_experience.tencent.responsibilities_1.quality_check}</span>
+                          <span className="text-sm text-primary-950/70 leading-normal">{content.work_experience.tencent.responsibilities_1.quality_check}</span>
                         </li>
                         <li className="flex items-start gap-2">
                           <CheckCircleIcon className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
-                          <span className="text-sm text-primary-950/70">{content.work_experience.tencent.responsibilities_1.complaint_review}</span>
+                          <span className="text-sm text-primary-950/70 leading-normal">{content.work_experience.tencent.responsibilities_1.complaint_review}</span>
                         </li>
                         <li className="flex items-start gap-2">
                           <CheckCircleIcon className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
-                          <span className="text-sm text-primary-950/70">{content.work_experience.tencent.responsibilities_1.violation_review}</span>
+                          <span className="text-sm text-primary-950/70 leading-normal">{content.work_experience.tencent.responsibilities_1.violation_review}</span>
                         </li>
                         <li className="flex items-start gap-2">
                           <CheckCircleIcon className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
-                          <span className="text-sm text-primary-950/70">{content.work_experience.tencent.responsibilities_1.patrol_inspection}</span>
+                          <span className="text-sm text-primary-950/70 leading-normal">{content.work_experience.tencent.responsibilities_1.patrol_inspection}</span>
                         </li>
                       </ul>
                     </div>
                     
                     <div>
-                      <p className="text-primary-950 mb-3">{content.work_experience.tencent.description_2}</p>
-                      <ul className="space-y-2">
+                      <p className="text-base text-primary-950 leading-relaxed mb-2">{content.work_experience.tencent.description_2}</p>
+                      <ul className="space-y-1.5">
                         <li className="flex items-start gap-2">
                           <CheckCircleIcon className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
-                          <span className="text-sm text-primary-950/70">{content.work_experience.tencent.responsibilities_2.queue_management}</span>
+                          <span className="text-sm text-primary-950/70 leading-normal">{content.work_experience.tencent.responsibilities_2.queue_management}</span>
                         </li>
                         <li className="flex items-start gap-2">
                           <CheckCircleIcon className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
-                          <span className="text-sm text-primary-950/70">{content.work_experience.tencent.responsibilities_2.daily_quality_check}</span>
+                          <span className="text-sm text-primary-950/70 leading-normal">{content.work_experience.tencent.responsibilities_2.daily_quality_check}</span>
                         </li>
                         <li className="flex items-start gap-2">
                           <CheckCircleIcon className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
-                          <span className="text-sm text-primary-950/70">{content.work_experience.tencent.responsibilities_2.rule_learning}</span>
+                          <span className="text-sm text-primary-950/70 leading-normal">{content.work_experience.tencent.responsibilities_2.rule_learning}</span>
                         </li>
                         <li className="flex items-start gap-2">
                           <CheckCircleIcon className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
-                          <span className="text-sm text-primary-950/70">{content.work_experience.tencent.responsibilities_2.ai_tools}</span>
+                          <span className="text-sm text-primary-950/70 leading-normal">{content.work_experience.tencent.responsibilities_2.ai_tools}</span>
                         </li>
                       </ul>
                     </div>
@@ -470,41 +470,41 @@ export default function CVPage() {
 
             {/* 在校经历 */}
             <m.div 
-              className="bg-primary-100 rounded-2xl shadow-lg p-6"
+              className="bg-primary-100 rounded-lg shadow-lg p-6"
               initial={{ opacity: 0, x: -30 }}
               animate={{ 
                 opacity: animationStage >= 3 ? 1 : 0,
                 x: animationStage >= 3 ? 0 : -30 
               }}
-              transition={{ duration: 0.8, delay: 0.2 }}
+              transition={{ duration: 0.6, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
             >
-              <div className="flex items-center gap-3 mb-6">
+              <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center">
-                  <UserGroupIcon className="w-6 h-6 text-accent" />
+                  <UserGroupIcon className="text-xl text-accent" />
                 </div>
-                <h2 className="text-xl font-bold text-primary-950">{content.school_experience.title}</h2>
+                <h2 className="text-2xl font-bold text-primary-950 leading-snug">{content.school_experience.title}</h2>
               </div>
               
-              <div className="border-l-4 border-accent pl-6">
-                <h3 className="text-lg font-semibold text-primary-950 mb-2">{content.school_experience.practice.title}</h3>
-                <p className="text-accent font-medium mb-4">{content.school_experience.practice.hospital}</p>
+              <div className="border-l-4 border-accent pl-4">
+                <h3 className="text-xl font-semibold text-primary-950 leading-snug mb-1">{content.school_experience.practice.title}</h3>
+                <p className="text-base text-accent font-medium leading-normal mb-3">{content.school_experience.practice.hospital}</p>
                 
-                <ul className="space-y-2">
+                <ul className="space-y-1.5">
                   <li className="flex items-start gap-2">
                     <CheckCircleIcon className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
-                    <span className="text-sm text-primary-950/70">{content.school_experience.practice.activities.medical_learning}</span>
+                    <span className="text-sm text-primary-950/70 leading-normal">{content.school_experience.practice.activities.medical_learning}</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircleIcon className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
-                    <span className="text-sm text-primary-950/70">{content.school_experience.practice.activities.nursing_learning}</span>
+                    <span className="text-sm text-primary-950/70 leading-normal">{content.school_experience.practice.activities.nursing_learning}</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircleIcon className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
-                    <span className="text-sm text-primary-950/70">{content.school_experience.practice.activities.patient_communication}</span>
+                    <span className="text-sm text-primary-950/70 leading-normal">{content.school_experience.practice.activities.patient_communication}</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircleIcon className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
-                    <span className="text-sm text-primary-950/70">{content.school_experience.practice.activities.meeting_participation}</span>
+                    <span className="text-sm text-primary-950/70 leading-normal">{content.school_experience.practice.activities.meeting_participation}</span>
                   </li>
                 </ul>
               </div>
@@ -512,66 +512,66 @@ export default function CVPage() {
           </div>
 
           {/* 右侧：技能、教育、证书等 */}
-          <div className="space-y-8">
+          <div className="space-y-6">
             
             {/* 教育背景 */}
             <m.div 
-              className="bg-primary-100 rounded-2xl shadow-lg p-6"
+              className="bg-primary-100 rounded-lg shadow-lg p-6"
               initial={{ opacity: 0, x: 30 }}
               animate={{ 
                 opacity: animationStage >= 4 ? 1 : 0,
                 x: animationStage >= 4 ? 0 : 30 
               }}
-              transition={{ duration: 0.8, delay: 0.1 }}
+              transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
             >
-              <div className="flex items-center gap-3 mb-6">
+              <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center">
-                  <AcademicCapIcon className="w-6 h-6 text-accent" />
+                  <AcademicCapIcon className="text-xl text-accent" />
                 </div>
-                <h2 className="text-xl font-bold text-primary-950">{content.education.title}</h2>
+                <h2 className="text-2xl font-bold text-primary-950 leading-snug">{content.education.title}</h2>
               </div>
               
-              <div className="space-y-3">
-                <h3 className="text-lg font-semibold text-primary-950">{content.education.university}</h3>
-                <p className="text-accent font-medium">{content.education.major}</p>
+              <div className="space-y-2">
+                <h3 className="text-xl font-semibold text-primary-950 leading-snug">{content.education.university}</h3>
+                <p className="text-base text-accent font-medium leading-normal">{content.education.major}</p>
               </div>
             </m.div>
 
             {/* 职业技能 */}
             <m.div 
-              className="bg-primary-100 rounded-2xl shadow-lg p-6"
+              className="bg-primary-100 rounded-lg shadow-lg p-6"
               initial={{ opacity: 0, x: 30 }}
               animate={{ 
                 opacity: animationStage >= 4 ? 1 : 0,
                 x: animationStage >= 4 ? 0 : 30 
               }}
-              transition={{ duration: 0.8, delay: 0.2 }}
+              transition={{ duration: 0.6, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
             >
-              <div className="flex items-center gap-3 mb-6">
+              <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center">
-                  <WrenchScrewdriverIcon className="w-6 h-6 text-accent" />
+                  <WrenchScrewdriverIcon className="text-xl text-accent" />
                 </div>
-                <h2 className="text-xl font-bold text-primary-950">{content.skills.title}</h2>
+                <h2 className="text-2xl font-bold text-primary-950 leading-snug">{content.skills.title}</h2>
               </div>
               
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {skillsData.map((skill, index) => (
                   <m.div 
                     key={skill.name}
-                    className="space-y-2"
+                    className="space-y-1.5"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ 
                       opacity: animationStage >= 4 ? 1 : 0,
                       y: animationStage >= 4 ? 0 : 20 
                     }}
-                    transition={{ duration: 0.6, delay: 0.3 + index * 0.1 }}
+                    transition={{ duration: 0.6, delay: 0.25 + index * 0.05, ease: [0.16, 1, 0.3, 1] }}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <skill.icon className="w-4 h-4 text-primary-950/70" />
-                        <span className="text-sm font-medium text-primary-950">{skill.name}</span>
+                        <span className="text-sm font-medium text-primary-950 leading-normal">{skill.name}</span>
                       </div>
-                      <span className="text-xs text-primary-950/70">{skill.level}</span>
+                      <span className="text-xs text-primary-950/70 leading-normal tracking-wide">{skill.level}</span>
                     </div>
                     <div className="w-full bg-primary-50 rounded-full h-2">
                       <m.div 
@@ -580,7 +580,7 @@ export default function CVPage() {
                         animate={{ 
                           width: animationStage >= 4 ? `${skill.progress}%` : 0 
                         }}
-                        transition={{ duration: 1, delay: 0.5 + index * 0.1, ease: "easeOut" }}
+                        transition={{ duration: 0.6, delay: 0.4 + index * 0.05, ease: [0.16, 1, 0.3, 1] }}
                       />
                     </div>
                   </m.div>
@@ -590,52 +590,52 @@ export default function CVPage() {
 
             {/* 资格证书 */}
             <m.div 
-              className="bg-primary-100 rounded-2xl shadow-lg p-6"
+              className="bg-primary-100 rounded-lg shadow-lg p-6"
               initial={{ opacity: 0, x: 30 }}
               animate={{ 
                 opacity: animationStage >= 4 ? 1 : 0,
                 x: animationStage >= 4 ? 0 : 30 
               }}
-              transition={{ duration: 0.8, delay: 0.3 }}
+              transition={{ duration: 0.6, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
             >
-              <div className="flex items-center gap-3 mb-6">
+              <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center">
-                  <TrophyIcon className="w-6 h-6 text-accent" />
+                  <TrophyIcon className="text-xl text-accent" />
                 </div>
-                <h2 className="text-xl font-bold text-primary-950">{content.certificates.title}</h2>
+                <h2 className="text-2xl font-bold text-primary-950 leading-snug">{content.certificates.title}</h2>
               </div>
               
               <div className="flex items-center gap-2">
                 <CheckCircleIcon className="w-5 h-5 text-accent" />
-                <span className="text-primary-950">{content.certificates.cet6}</span>
+                <span className="text-base text-primary-950 leading-normal">{content.certificates.cet6}</span>
               </div>
             </m.div>
 
             {/* 兴趣爱好 */}
             <m.div 
-              className="bg-primary-100 rounded-2xl shadow-lg p-6"
+              className="bg-primary-100 rounded-lg shadow-lg p-6"
               initial={{ opacity: 0, x: 30 }}
               animate={{ 
                 opacity: animationStage >= 4 ? 1 : 0,
                 x: animationStage >= 4 ? 0 : 30 
               }}
-              transition={{ duration: 0.8, delay: 0.4 }}
+              transition={{ duration: 0.6, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
             >
-              <div className="flex items-center gap-3 mb-6">
+              <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center">
-                  <HeartIcon className="w-6 h-6 text-accent" />
+                  <HeartIcon className="text-xl text-accent" />
                 </div>
-                <h2 className="text-xl font-bold text-primary-950">{content.hobbies.title}</h2>
+                <h2 className="text-2xl font-bold text-primary-950 leading-snug">{content.hobbies.title}</h2>
               </div>
               
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <span className="text-2xl">🎮</span>
-                  <span className="text-primary-950">{content.hobbies.gaming}</span>
+                  <span className="text-base text-primary-950 leading-normal">{content.hobbies.gaming}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-2xl">🚴</span>
-                  <span className="text-primary-950">{content.hobbies.cycling}</span>
+                  <span className="text-base text-primary-950 leading-normal">{content.hobbies.cycling}</span>
                 </div>
               </div>
             </m.div>
@@ -644,30 +644,31 @@ export default function CVPage() {
 
         {/* 自我评价 */}
         <m.div 
-          className="bg-primary-100 rounded-2xl shadow-lg p-8 mt-8"
+          className="bg-primary-100 rounded-lg shadow-lg p-6 mt-6"
           initial={{ opacity: 0, y: 30 }}
           animate={{ 
             opacity: animationStage >= 5 ? 1 : 0,
             y: animationStage >= 5 ? 0 : 30 
           }}
-          transition={{ duration: 0.8, delay: 0.1 }}
+          transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
         >
-          <div className="flex items-center gap-3 mb-6">
+          <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center">
-              <UserIcon className="w-6 h-6 text-accent" />
+              <UserIcon className="text-xl text-accent" />
             </div>
-            <h2 className="text-xl font-bold text-primary-950">{content.self_evaluation.title}</h2>
+            <h2 className="text-2xl font-bold text-primary-950 leading-snug">{content.self_evaluation.title}</h2>
           </div>
           
-          <p className="text-base leading-relaxed text-primary-950">{content.self_evaluation.content}</p>
+          <p className="text-base leading-relaxed text-primary-950 max-w-4xl">{content.self_evaluation.content}</p>
         </m.div>
 
         {/* 返回首页链接 */}
-        <div className="mt-8 text-center">
+        <div className="mt-6 text-center">
           <Link
             to="/"
             prefetch="intent"
-            className="inline-flex items-center gap-2 bg-accent text-white px-6 py-3 rounded font-medium hover:bg-accent-hover transition-all duration-300 ease-expo-out shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+            className="inline-flex items-center gap-2 bg-accent text-white px-6 py-3 rounded text-sm font-medium transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 active:shadow-md"
+            style={{ transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)' }}
           >
             ← 返回首页
           </Link>
@@ -680,19 +681,20 @@ export default function CVPage() {
 
 export function ErrorBoundary() {
   return (
-    <div className="min-h-screen bg-primary-50 flex items-center justify-center">
-      <div className="bg-primary-100 p-8 rounded-lg shadow-lg max-w-md w-full mx-4">
+    <div className="min-h-screen bg-primary-50 flex items-center justify-center p-4">
+      <div className="bg-primary-100 p-6 md:p-8 rounded-lg shadow-lg max-w-md w-full">
         <div className="text-center">
-          <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-3">
             <svg className="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
             </svg>
           </div>
-          <h1 className="text-xl font-semibold text-primary-950 mb-2">简历页面错误</h1>
+          <h1 className="text-2xl font-bold text-primary-950 leading-snug mb-2">简历页面错误</h1>
           <p className="text-base leading-relaxed text-primary-950/70 mb-4">抱歉，个人简历页面暂时无法显示。</p>
           <Link
             to="/"
-            className="bg-accent hover:bg-accent-hover text-white px-4 py-2 rounded font-medium transition-colors duration-300 ease-expo-out inline-block"
+            className="bg-accent text-white px-6 py-3 rounded text-sm font-medium transition-all duration-300 inline-block shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 active:shadow-md"
+            style={{ transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)' }}
           >
             返回首页
           </Link>

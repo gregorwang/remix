@@ -42,21 +42,24 @@ export const meta: MetaFunction = () => {
 export default function GameIndex() {
   return (
     <div className="min-h-screen bg-primary-50">
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r from-accent/10 to-accent-hover/10 py-20">
+      {/* Hero Section - 使用 section-sm 间距 */}
+      <div className="bg-gradient-to-r from-accent/10 to-accent-hover/10 py-section-sm">
         <div className="max-w-7xl mx-auto px-6 text-center">
-          <h1 className="text-5xl font-bold text-primary-950 mb-6">
+          {/* Hero 标题 - text-5xl + font-bold + tracking-tighter + leading-none */}
+          <h1 className="text-5xl font-bold text-primary-950 mb-3 tracking-tighter leading-none">
             🎮 游戏中心
           </h1>
-          <p className="text-xl text-primary-950/70 mb-8">
+          {/* 描述文字 - text-lg + leading-relaxed */}
+          <p className="text-lg text-primary-950/70 leading-relaxed">
             选择一个平台，开始探索我的游戏世界
           </p>
         </div>
       </div>
 
-      {/* Platform Selection */}
-      <div className="max-w-7xl mx-auto px-6 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      {/* Platform Selection - 使用 section-md 间距 */}
+      <div className="max-w-7xl mx-auto px-6 py-section-md">
+        {/* 卡片间距使用流体值 3rem */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {platforms.map((platform) => {
             const Icon = platform.icon;
             return (
@@ -64,45 +67,47 @@ export default function GameIndex() {
                 key={platform.id}
                 to={`/game/${platform.id}`}
                 prefetch="intent"
-                className="group relative bg-primary-100 rounded-2xl p-8 hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border border-primary-950/10"
+                className="group relative bg-primary-100 rounded-lg p-2.5 border border-primary-950/10 transition-all duration-300 ease-expo-out hover:-translate-y-1 hover:shadow-2xl"
               >
-                {/* Background Gradient on Hover */}
-                <div className={`absolute inset-0 bg-gradient-to-br ${platform.gradient} opacity-0 group-hover:opacity-10 rounded-2xl transition-opacity duration-300`} />
+                {/* Background Gradient on Hover - 动画：opacity 300ms + ease-expo-out */}
+                <div className={`absolute inset-0 bg-gradient-to-br ${platform.gradient} opacity-0 group-hover:opacity-10 rounded-lg transition-opacity duration-300 ease-expo-out`} />
                 
                 <div className="relative z-10">
-                  {/* Icon */}
-                  <div className="mb-6 flex justify-center">
-                    <div className={`w-20 h-20 rounded-full bg-gradient-to-br ${platform.gradient} flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                  {/* Icon - 使用固定间距 1.5rem + 动画：transform 300ms */}
+                  <div className="mb-1.5 flex justify-center">
+                    <div className={`w-20 h-20 rounded-full bg-gradient-to-br ${platform.gradient} flex items-center justify-center text-white shadow-lg transition-transform duration-300 ease-expo-out group-hover:scale-110`}>
                       <Icon className="w-10 h-10" />
                     </div>
                   </div>
 
-                  {/* Platform Name */}
-                  <h2 className="text-2xl font-bold text-primary-950 mb-4 text-center group-hover:text-accent-hover transition-colors">
+                  {/* Platform Name - text-2xl + font-semibold + tracking-tight + leading-snug + 动画：颜色 300ms */}
+                  <h2 className="text-2xl font-semibold text-primary-950 mb-1 text-center tracking-tight leading-snug transition-colors duration-300 ease-expo-out group-hover:text-accent-hover">
                     {platform.name}
                   </h2>
 
-                  {/* Description */}
-                  <p className="text-primary-950/70 text-center mb-6">
+                  {/* Description - text-base + leading-normal */}
+                  <p className="text-base text-primary-950/70 text-center mb-1.5 leading-normal">
                     {platform.description}
                   </p>
 
-                  {/* Stats */}
-                  <div className="flex justify-around pt-6 border-t border-primary-950/10">
+                  {/* Stats - 使用固定间距 1.5rem */}
+                  <div className="flex justify-around pt-1.5 border-t border-primary-950/10">
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-primary-950">{platform.stats.total}</div>
-                      <div className="text-sm text-primary-950/60">游戏总数</div>
+                      {/* 数字 - text-2xl + font-semibold + tabular-nums */}
+                      <div className="text-2xl font-semibold text-primary-950 tabular-nums">{platform.stats.total}</div>
+                      {/* 标签 - text-sm + leading-normal */}
+                      <div className="text-sm text-primary-950/60 leading-normal">游戏总数</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-accent-hover">{platform.stats.completed}</div>
-                      <div className="text-sm text-primary-950/60">已完成</div>
+                      <div className="text-2xl font-semibold text-accent-hover tabular-nums">{platform.stats.completed}</div>
+                      <div className="text-sm text-primary-950/60 leading-normal">已完成</div>
                     </div>
                   </div>
 
-                  {/* Arrow Icon */}
-                  <div className="mt-6 flex justify-center">
+                  {/* Arrow Icon - 使用固定间距 1.5rem + 动画：transform 300ms + ease-expo-out */}
+                  <div className="mt-1.5 flex justify-center">
                     <svg 
-                      className="w-6 h-6 text-accent-hover transform group-hover:translate-x-2 transition-transform duration-300" 
+                      className="w-6 h-6 text-accent-hover transition-transform duration-300 ease-expo-out group-hover:translate-x-2" 
                       fill="none" 
                       stroke="currentColor" 
                       viewBox="0 0 24 24"

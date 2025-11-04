@@ -219,7 +219,12 @@ export default function GameRoute() {
       </div>
 
       <div className="relative z-10">
-        <Suspense fallback={<div className="text-primary-950">Loading Game Page...</div>}>
+        <Suspense fallback={
+          <div className="flex items-center justify-center min-h-screen">
+            {/* Loading 文字 - text-xl + font-medium + leading-normal */}
+            <div className="text-primary-950 text-xl font-medium leading-normal">Loading Game Page...</div>
+          </div>
+        }>
           <GamePageClient {...data} />
         </Suspense>
       </div>

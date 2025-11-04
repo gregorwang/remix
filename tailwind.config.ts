@@ -37,14 +37,34 @@ export default {
         }
       },
       spacing: {
+        // Component Level (固定值) - 根据 03-spacing.md
+        '0.25': '0.25rem',   // 4px - 最小间隙
+        '0.5': '0.5rem',     // 8px - 小间距
+        '0.75': '0.75rem',   // 12px - 紧凑padding
+        '1': '1rem',         // 16px - 基准间距
+        '1.5': '1.5rem',     // 24px - 标准padding
+        
+        // Component Level (流体值)
+        '2': fluid(1.75, 2),      // 28-32px - 卡片间距
+        '2.5': fluid(2, 2.5),     // 32-40px - 中等间距
+        '3': fluid(2.5, 3),       // 40-48px - 大间距
+        '4': fluid(3.25, 4),      // 52-64px - 超大间距
+        
+        // Page Level (页面级间距)
         'section-sm': fluid(4, 6),      // 64-96px
         'section-md': fluid(6, 8),       // 96-128px
         'section-lg': fluid(8, 12.5),   // 128-200px
         'section-xl': fluid(13, 15),    // 208-240px
       },
       borderRadius: {
-        'xs': '0.25rem',    // 4px
-        'DEFAULT': '0.75rem', // 12px - main作为默认值
+        // 根据 04-radius.md 圆角系统
+        'xs': '0.25rem',     // 4px - 微小元素、标签
+        'sm': '0.5rem',      // 8px - 小型交互元素
+        'DEFAULT': '0.75rem', // 12px - 标准UI控件（main）
+        'lg': '1rem',        // 16px - 中大型容器
+        'xl': 'clamp(1rem, 0.857rem + 0.714vw, 1.5rem)',     // 16-24px - 大型容器（响应式）
+        '2xl': 'clamp(1rem, 0.714rem + 1.429vw, 2rem)',      // 16-32px - 页面级容器（响应式）
+        'full': '9999px',    // 完全圆形
       },
       transitionTimingFunction: {
         'expo-out': 'cubic-bezier(0.16, 1, 0.3, 1)',
@@ -54,12 +74,18 @@ export default {
         '600': '600ms',
       },
       animation: {
+        // 装饰性动画（保留原有）
         'blob': 'blob 7s infinite',
         'spin-slow': 'spin-slow 3s linear infinite',
         'bounce-slow': 'bounce-slow 3s ease-in-out infinite',
+        
+        // 标准UI动画（根据 06-animation.md）
         'fade-in': 'fadeIn 600ms cubic-bezier(0.16, 1, 0.3, 1)',
+        'slide-down': 'slideDown 600ms cubic-bezier(0.16, 1, 0.3, 1)',
+        'scale-in': 'scaleIn 600ms cubic-bezier(0.16, 1, 0.3, 1)',
       },
       keyframes: {
+        // 装饰性关键帧（保留原有）
         blob: {
           '0%': { transform: 'translate(0px, 0px) scale(1)' },
           '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
@@ -80,9 +106,19 @@ export default {
             'animation-timing-function': 'cubic-bezier(0, 0, 0.2, 1)' 
           },
         },
+        
+        // 标准UI关键帧（根据 06-animation.md）
         fadeIn: {
           '0%': { opacity: '0', transform: 'translateY(10px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        slideDown: {
+          '0%': { opacity: '0', transform: 'translateY(-10px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        scaleIn: {
+          '0%': { opacity: '0', transform: 'scale(0.95)' },
+          '100%': { opacity: '1', transform: 'scale(1)' },
         },
       },
     },

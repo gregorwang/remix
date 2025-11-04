@@ -129,14 +129,14 @@ export default function GamePlatformRoute() {
         ))}
       </div>
 
-      {/* Back to platforms link */}
-      <div className="relative z-10 max-w-7xl mx-auto px-6 pt-6">
+      {/* Back to platforms link - 使用固定间距和正确字体 + 动画：300ms + ease-expo-out */}
+      <div className="relative z-10 max-w-7xl mx-auto px-6 pt-1.5">
         <Link 
           to="/game" 
           prefetch="intent"
-          className="inline-flex items-center space-x-2 text-primary-950/70 hover:text-accent-hover transition-colors group"
+          className="inline-flex items-center gap-0.5 text-base font-medium text-primary-950/70 leading-normal transition-colors duration-300 ease-expo-out hover:text-accent-hover group"
         >
-          <svg className="w-5 h-5 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 transition-transform duration-300 ease-expo-out group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
           </svg>
           <span>返回平台选择</span>
@@ -146,7 +146,8 @@ export default function GamePlatformRoute() {
       <div className="relative z-10">
         <Suspense fallback={
           <div className="flex items-center justify-center min-h-screen">
-            <div className="text-primary-950 text-xl">Loading {params.platform} games...</div>
+            {/* Loading 文字 - text-xl + font-medium + leading-normal */}
+            <div className="text-primary-950 text-xl font-medium leading-normal">Loading {params.platform} games...</div>
           </div>
         }>
           <GamePageClient {...data} />
@@ -161,13 +162,16 @@ export function ErrorBoundary() {
   return (
     <div className="min-h-screen bg-primary-50 flex items-center justify-center px-6">
       <div className="text-center">
-        <h1 className="text-4xl font-bold text-primary-950 mb-4">平台未找到</h1>
-        <p className="text-primary-950/70 mb-8">
+        {/* H1 标题 - text-4xl + font-bold + leading-tight + tracking-tight */}
+        <h1 className="text-4xl font-bold text-primary-950 mb-2 leading-tight tracking-tight">平台未找到</h1>
+        {/* 描述文字 - text-base + leading-relaxed */}
+        <p className="text-base text-primary-950/70 mb-3 leading-relaxed">
           抱歉，我们找不到这个游戏平台。
         </p>
+        {/* 按钮 - text-sm + font-medium + 固定内边距 + rounded (12px) + 动画：transform + shadow */}
         <Link 
           to="/game" 
-          className="inline-block px-6 py-3 bg-gradient-to-r from-accent to-accent-hover text-white rounded-xl hover:scale-105 transition-transform"
+          className="inline-block px-1.5 py-0.75 bg-gradient-to-r from-accent to-accent-hover text-white text-sm font-medium rounded transition-all duration-300 ease-expo-out hover:-translate-y-0.5 hover:shadow-lg"
         >
           返回平台选择
         </Link>

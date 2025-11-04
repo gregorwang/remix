@@ -2,20 +2,71 @@
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css');
 
 /*
- * 设计系统颜色变量
+ * Music 页面设计系统样式
+ * 
+ * 颜色系统 (01-colors.md)
  * 主色: #faf9f5 (60%) - 温暖奶白色
  * 辅色: #f5f4ed (30%) - 浅米灰色
  * 点缀色: #d97757 (展示) / #c96442 (交互) (10%) - 陶土橙色
  * 文字色: #141413 - 深黑褐色
+ * 
+ * 字体系统 (02-typography.md)
+ * Hero标题: text-5xl + font-bold + leading-none + tracking-tighter
+ * H1: text-4xl + font-bold + leading-tight + tracking-tight
+ * H2: text-3xl + font-semibold + leading-tight + tracking-tight
+ * 正文: text-base + font-normal + leading-relaxed
+ * 按钮: text-sm + font-medium
+ * 
+ * 间距系统 (03-spacing.md)
+ * 组件内部: 固定值 (0.25/0.5/0.75/1/1.5rem)
+ * 组件外部: 流体值 (2/2.5/3/4rem)
+ * Section: Page Level (section-sm/md/lg/xl)
+ * 
+ * 圆角系统 (04-radius.md)
+ * xs: 4px (Badge/Tag)
+ * sm: 8px (小按钮)
+ * DEFAULT: 12px (标准按钮)
+ * lg: 16px (卡片)
+ * xl: 16-24px (特色卡片)
+ * 2xl: 16-32px (Hero)
+ * 
+ * 动画: Expo Out cubic-bezier(0.16, 1, 0.3, 1)
  */
 
-* {
-  font-family: 'Noto Sans SC', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+:root {
+  /* 间距系统 - Component Level (固定值) */
+  --spacing-0-25: 0.25rem;  /* 4px */
+  --spacing-0-5: 0.5rem;     /* 8px */
+  --spacing-0-75: 0.75rem;   /* 12px */
+  --spacing-1: 1rem;         /* 16px */
+  --spacing-1-5: 1.5rem;     /* 24px */
+  
+  /* 圆角系统 */
+  --radius-xs: 0.25rem;      /* 4px - Badge/Tag */
+  --radius-sm: 0.5rem;       /* 8px - 小按钮 */
+  --radius: 0.75rem;         /* 12px - 标准按钮 */
+  --radius-lg: 1rem;         /* 16px - 卡片 */
+  --radius-xl: clamp(1rem, 0.857rem + 0.714vw, 1.5rem);   /* 16-24px */
+  --radius-2xl: clamp(1rem, 0.714rem + 1.429vw, 2rem);    /* 16-32px */
 }
 
-/* 星空背景样式 */
+* {
+  font-family: 'Source Han Sans CN', 'Noto Sans SC', system-ui, sans-serif;
+}
+
+/* ============================================
+   星空背景系统 - 使用设计系统颜色
+   ============================================ */
+
 .starfield-bg {
-  background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 25%, #16213e 50%, #0f3460 75%, #533483 100%);
+  /* 深色背景使用文字色和点缀色 */
+  background: linear-gradient(135deg, 
+    #141413 0%,                        /* 深黑褐色 */
+    #2a2a28 25%,                       /* 深色过渡 */
+    #3d3d3a 50%,                       /* 中间色 */
+    rgba(217, 119, 87, 0.15) 75%,     /* 点缀色淡化 */
+    rgba(201, 100, 66, 0.2) 100%      /* 点缀色交互淡化 */
+  );
   min-height: 100vh;
   position: relative;
 }
@@ -39,13 +90,14 @@
   background: transparent;
 }
 
+/* 星星使用主色创建温暖星空 */
 .stars {
   background-image: 
-    radial-gradient(circle 2px at 20px 30px, #eee, transparent),
-    radial-gradient(circle 2px at 40px 70px, rgba(255,255,255,0.8), transparent),
-    radial-gradient(circle 1px at 90px 40px, #fff, transparent),
-    radial-gradient(circle 1px at 130px 80px, rgba(255,255,255,0.6), transparent),
-    radial-gradient(circle 2px at 160px 30px, #ddd, transparent);
+    radial-gradient(circle 2px at 20px 30px, #faf9f5, transparent),
+    radial-gradient(circle 2px at 40px 70px, rgba(250, 249, 245, 0.8), transparent),
+    radial-gradient(circle 1px at 90px 40px, #f5f4ed, transparent),
+    radial-gradient(circle 1px at 130px 80px, rgba(245, 244, 237, 0.6), transparent),
+    radial-gradient(circle 2px at 160px 30px, #faf9f5, transparent);
   background-repeat: repeat;
   background-size: 200px 100px;
   animation: zoom 20s infinite linear;
@@ -53,9 +105,9 @@
 
 .stars2 {
   background-image: 
-    radial-gradient(circle 1px at 40px 60px, #fff, transparent),
-    radial-gradient(circle 1px at 120px 10px, rgba(255,255,255,0.7), transparent),
-    radial-gradient(circle 1px at 160px 80px, #eee, transparent);
+    radial-gradient(circle 1px at 40px 60px, #faf9f5, transparent),
+    radial-gradient(circle 1px at 120px 10px, rgba(250, 249, 245, 0.7), transparent),
+    radial-gradient(circle 1px at 160px 80px, #f5f4ed, transparent);
   background-repeat: repeat;
   background-size: 300px 200px;
   animation: zoom 40s infinite linear;
@@ -63,23 +115,28 @@
 
 .stars3 {
   background-image: 
-    radial-gradient(circle 1px at 10px 10px, rgba(255,255,255,0.5), transparent),
-    radial-gradient(circle 1px at 150px 150px, rgba(255,255,255,0.4), transparent);
+    radial-gradient(circle 1px at 10px 10px, rgba(217, 119, 87, 0.5), transparent),
+    radial-gradient(circle 1px at 150px 150px, rgba(201, 100, 66, 0.4), transparent);
   background-repeat: repeat;
   background-size: 400px 300px;
   animation: zoom 60s infinite linear;
 }
 
 @keyframes zoom {
-  from {
-    transform: scale(0);
-  }
-  to {
-    transform: scale(1);
-  }
+  from { transform: scale(0); }
+  to { transform: scale(1); }
 }
 
-/* 滚动进度条 - 使用设计系统点缀色 */
+/* 星星移动动画（从 tailwind.css 迁移） */
+@keyframes stars-move {
+  from { transform: translateY(0px); }
+  to { transform: translateY(-1000px); }
+}
+
+/* ============================================
+   进度条和特效 - 使用点缀色
+   ============================================ */
+
 .constellation-progress {
   position: fixed;
   top: 0;
@@ -93,7 +150,10 @@
   transition: transform 0.1s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* 粒子效果样式 */
+/* ============================================
+   粒子系统 - 使用点缀色
+   ============================================ */
+
 .particles-container {
   position: absolute;
   top: 0;
@@ -106,7 +166,6 @@
 
 .particle {
   position: absolute;
-  /* 使用设计系统点缀色（陶土橙） */
   background: radial-gradient(circle, rgba(217, 119, 87, 0.8) 0%, rgba(217, 119, 87, 0.2) 50%, transparent 100%);
   border-radius: 50%;
   animation: particle-float linear infinite;
@@ -130,7 +189,85 @@
   }
 }
 
-/* 动画定义 */
+/* ============================================
+   颜色类 - 设计系统颜色
+   ============================================ */
+
+.galaxy-bg {
+  /* 使用点缀色创建温暖光效 */
+  background: radial-gradient(ellipse at center, rgba(217, 119, 87, 0.08) 0%, transparent 50%),
+              radial-gradient(ellipse at 80% 20%, rgba(201, 100, 66, 0.06) 0%, transparent 50%),
+              radial-gradient(ellipse at 20% 80%, rgba(217, 119, 87, 0.08) 0%, transparent 50%);
+}
+
+.text-galaxy-white {
+  color: rgba(250, 249, 245, 0.9); /* 主色淡化 */
+}
+
+.text-star-gold {
+  color: #d97757; /* 点缀色-展示 (10%) */
+}
+
+.text-aurora-purple {
+  color: #c96442; /* 点缀色-交互 (10%) */
+}
+
+/* ============================================
+   文字特效 - 使用点缀色
+   ============================================ */
+
+.stellar-text {
+  background: linear-gradient(45deg, #d97757, #c96442, #d97757);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 30px rgba(217, 119, 87, 0.5);
+}
+
+.glowing-number {
+  text-shadow: 0 0 20px currentColor;
+}
+
+/* ============================================
+   玻璃态效果 - 使用主色和辅色
+   ============================================ */
+
+.glass-effect {
+  background: rgba(250, 249, 245, 0.05); /* 主色淡化 */
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(250, 249, 245, 0.1);
+}
+
+.cosmic-glass {
+  background: rgba(245, 244, 237, 0.08); /* 辅色淡化 */
+  backdrop-filter: blur(25px);
+  border: 1px solid rgba(250, 249, 245, 0.15);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(250, 249, 245, 0.2);
+}
+
+.constellation-tag {
+  background: rgba(250, 249, 245, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(250, 249, 245, 0.2);
+  border-radius: 9999px;  /* Tag使用全圆角 */
+  padding: var(--spacing-0-25) var(--spacing-0-75);  /* 组件内部固定间距 */
+  font-size: 0.75rem;
+  font-weight: 500;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.constellation-tag:hover {
+  background: rgba(217, 119, 87, 0.2); /* 点缀色 */
+  transform: scale(1.05);
+  box-shadow: 0 var(--spacing-0-25) var(--spacing-0-75) rgba(217, 119, 87, 0.4);
+}
+
+/* ============================================
+   动画效果 - 使用 Expo Out 缓动
+   ============================================ */
+
 @keyframes pulse-slow {
   0%, 100% { opacity: 1; transform: scale(1); }
   50% { opacity: 0.8; transform: scale(1.05); }
@@ -161,7 +298,6 @@
   to { opacity: 1; transform: scale(1); }
 }
 
-/* 应用动画 - 使用设计系统 Expo Out 缓动 */
 .animate-pulse-slow {
   animation: pulse-slow 4s cubic-bezier(0.16, 1, 0.3, 1) infinite;
 }
@@ -170,94 +306,61 @@
   animation: float 3s cubic-bezier(0.16, 1, 0.3, 1) infinite;
 }
 
-/* 星空主题样式 - 使用设计系统点缀色 */
-.stellar-text {
-  background: linear-gradient(45deg, #d97757, #c96442, #d97757);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-shadow: 0 0 30px rgba(217, 119, 87, 0.5);
+.stellar-pulse {
+  animation: pulse-slow 2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
 }
 
-.glowing-number {
-  text-shadow: 0 0 20px currentColor;
-}
+/* ============================================
+   音乐卡片 - 使用点缀色
+   ============================================ */
 
-.cosmic-glass {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.galaxy-bg {
-  /* 使用设计系统点缀色创建渐变效果 */
-  background: radial-gradient(ellipse at center, rgba(217, 119, 87, 0.08) 0%, transparent 50%),
-              radial-gradient(ellipse at 80% 20%, rgba(201, 100, 66, 0.06) 0%, transparent 50%),
-              radial-gradient(ellipse at 20% 80%, rgba(217, 119, 87, 0.08) 0%, transparent 50%);
-}
-
-/* 颜色变量 - 使用设计系统颜色 */
-.text-galaxy-white {
-  color: rgba(255, 255, 255, 0.8);
-}
-
-/* 设计系统点缀色（展示用） */
-.text-star-gold {
-  color: #d97757; /* 陶土橙 - 展示用 */
-}
-
-/* 设计系统点缀色（交互用） */
-.text-aurora-purple {
-  color: #c96442; /* 陶土橙 - 交互用 */
-}
-
-/* 歌词流动动画 */
-.lyric-stream-area {
+.music-timeline-container {
   position: relative;
-  overflow: hidden;
-}
-
-.lyric-stream-item {
-  animation: lyric-flow linear infinite;
+  max-width: 80rem;
+  margin: 0 auto;
   will-change: transform;
 }
 
-@keyframes lyric-flow {
-  0% {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  10% {
-    opacity: 1;
-  }
-  90% {
-    opacity: 1;
-  }
-  100% {
-    transform: translateX(-100%);
-    opacity: 0;
-  }
+.music-card-item {
+  transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* 音乐卡片样式 - 使用设计系统动画 */
 .music-card {
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(250, 249, 245, 0.1);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
+              box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card-hover {
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .card-hover:hover {
-  transform: translateY(-5px) scale(1.02);
-  box-shadow: 0 20px 40px rgba(217, 119, 87, 0.2);
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 25px 50px -12px rgba(217, 119, 87, 0.3); /* 点缀色 */
 }
 
 .stellar-glow {
-  /* 使用设计系统点缀色 */
-  box-shadow: 0 0 30px rgba(217, 119, 87, 0.4), 0 0 60px rgba(201, 100, 66, 0.2);
+  box-shadow: 
+    0 0 30px rgba(217, 119, 87, 0.4),
+    0 0 60px rgba(201, 100, 66, 0.2),
+    inset 0 0 30px rgba(250, 249, 245, 0.1);
 }
 
-/* 统计卡片样式 - 使用设计系统颜色和动画 */
+/* ============================================
+   统计卡片 - 使用点缀色
+   ============================================ */
+
+.music-stats-container {
+  font-family: 'Source Han Sans CN', 'Noto Sans SC', system-ui, sans-serif;
+}
+
 .stat-card {
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
+              box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
+              border-color 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid rgba(250, 249, 245, 0.1);
 }
 
 .stat-card:hover {
@@ -266,90 +369,136 @@
   border-color: rgba(217, 119, 87, 0.3);
 }
 
-/* 关键词高亮样式 - 使用设计系统点缀色 */
-.keyword-highlight {
-  text-align: center;
-  padding: 1rem;
-  border-radius: 1rem;
-  background: rgba(217, 119, 87, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(217, 119, 87, 0.2);
+/* ============================================
+   歌词流动效果
+   ============================================ */
+
+.lyric-stream-area {
+  position: relative;
+  overflow: hidden;
+  mask: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+  -webkit-mask: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
 }
 
-/* 场景样式 - 使用设计系统颜色创建温暖色调 */
+.stream-container {
+  /* 使用主色和辅色创建渐变 */
+  background: linear-gradient(135deg, rgba(250, 249, 245, 0.15) 0%, rgba(245, 244, 237, 0.05) 100%);
+}
+
+.lyrics-stream-container {
+  position: relative;
+  z-index: 1;
+}
+
+.lyric-stream-item {
+  position: absolute !important;
+  white-space: nowrap !important;
+  pointer-events: auto;
+  animation: streamFlow linear infinite;
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
+}
+
+.lyric-stream-item:hover {
+  opacity: 1 !important;
+  transform: scale(1.05) !important;
+  z-index: 10;
+  animation-play-state: paused;
+}
+
+@keyframes streamFlow {
+  0% {
+    transform: translateX(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.9;
+  }
+  90% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateX(-150vw);
+    opacity: 0;
+  }
+}
+
+/* ============================================
+   场景样式 - 使用设计系统颜色
+   ============================================ */
+
 .afternoon-scene {
   position: relative;
-  /* 使用设计系统主色和点缀色创建渐变 */
-  background: linear-gradient(135deg, #faf9f5 0%, #f5f4ed 30%, rgba(217, 119, 87, 0.3) 70%, rgba(201, 100, 66, 0.4) 100%);
-  border-radius: 20px;
+  /* 使用主色、辅色和点缀色创建温暖下午场景 */
+  background: linear-gradient(135deg, 
+    #faf9f5 0%,                      /* 主色 */
+    #f5f4ed 30%,                     /* 辅色 */
+    rgba(217, 119, 87, 0.3) 70%,    /* 点缀色淡化 */
+    rgba(201, 100, 66, 0.4) 100%    /* 点缀色交互淡化 */
+  );
+  border-radius: var(--radius-lg);  /* 卡片圆角 16px */
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 var(--spacing-0-5) var(--spacing-1-5) rgba(0, 0, 0, 0.3);
 }
 
 .sun-ray {
   transform-origin: center;
+  animation: pulse 2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
 }
+
+.sun-ray:nth-child(2) { animation-delay: 0.2s; }
+.sun-ray:nth-child(3) { animation-delay: 0.4s; }
+.sun-ray:nth-child(4) { animation-delay: 0.6s; }
+.sun-ray:nth-child(5) { animation-delay: 0.8s; }
 
 .cloud {
   animation: float 6s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
+.cloud:nth-child(2) {
+  animation-delay: 1s;
 }
 
 .hill {
   filter: blur(1px);
 }
 
-/* 响应式设计 */
-@media (max-width: 768px) {
-  .stellar-text {
-    font-size: 2rem;
-  }
-  
-  .music-card {
-    padding: 1rem;
-  }
-  
-  .stat-card {
-    padding: 0.75rem;
-  }
-  
-  .lyric-stream-item {
-    font-size: 0.875rem;
-    padding: 0.5rem 1rem;
-  }
+/* ============================================
+   关键词高亮 - 使用点缀色
+   ============================================ */
+
+.keyword-highlight {
+  text-align: center;
+  padding: var(--spacing-1);  /* 组件内部固定间距 */
+  border-radius: var(--radius-lg);  /* 卡片圆角 16px */
+  background: rgba(217, 119, 87, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(217, 119, 87, 0.2);
 }
 
-/* 性能优化 */
-.transform-gpu {
-  transform: translateZ(0);
-  will-change: transform;
-}
+/* ============================================
+   年度歌手展示 - 使用设计系统颜色
+   ============================================ */
 
-/* 滚动优化 */
-.music-timeline-container {
-  will-change: transform;
-}
-
-/* 图片加载优化 */
-img {
-  image-rendering: -webkit-optimize-contrast;
-  image-rendering: crisp-edges;
-}
-
-/* 年度歌手展示样式 */
 .artist-showcase-section {
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  background: linear-gradient(135deg, 
+    #141413 0%,                       /* 文字色作为深色背景 */
+    #2a2a28 50%,                      /* 深色过渡 */
+    rgba(217, 119, 87, 0.15) 100%    /* 点缀色淡化 */
+  );
 }
 
 .main-artist-image {
   position: relative;
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .main-artist-image::before {
   content: '';
   position: absolute;
   inset: -4px;
-  /* 使用设计系统点缀色创建旋转边框 */
+  /* 使用点缀色创建旋转边框 */
   background: linear-gradient(45deg, #d97757, #c96442, #d97757, #c96442, #d97757);
   border-radius: 50%;
   z-index: -1;
@@ -376,17 +525,16 @@ img {
 }
 
 .timeline-item img {
-  transition: filter 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: filter 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
+              box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   filter: brightness(0.9);
 }
 
 .timeline-item:hover img {
   filter: brightness(1.1);
-  /* 使用设计系统点缀色 */
   box-shadow: 0 8px 25px rgba(217, 119, 87, 0.3);
 }
 
-/* 气泡动画 - 使用设计系统 Expo Out 缓动 */
 .floating {
   animation: floating 6s cubic-bezier(0.16, 1, 0.3, 1) infinite;
 }
@@ -397,8 +545,88 @@ img {
   66% { transform: translateY(-10px) rotate(240deg); }
 }
 
-/* 响应式优化 - 年度歌手展示 */
+.album-item:hover {
+  transform: scale(1.1) rotate(2deg);
+}
+
+/* ============================================
+   性能优化
+   ============================================ */
+
+.transform-gpu {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.main-artist-image,
+.timeline-item,
+.floating,
+.sun, 
+.cloud, 
+.hill, 
+.music-notes {
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+.album-item img {
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+.album-item:hover img {
+  filter: brightness(1.1) contrast(1.05);
+  transform: translateZ(0);
+}
+
+img {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+/* ============================================
+   响应式设计
+   ============================================ */
+
 @media (max-width: 768px) {
+  .stellar-text {
+    font-size: 2rem;
+  }
+  
+  .music-card {
+    padding: var(--spacing-1);  /* 16px */
+  }
+  
+  .stat-card {
+    padding: var(--spacing-0-75);  /* 12px */
+  }
+  
+  .lyric-stream-item {
+    font-size: 0.875rem;
+    padding: var(--spacing-0-5) var(--spacing-1);  /* 8px 16px */
+  }
+  
+  .stream-container {
+    height: 32rem;
+  }
+
+  .lyric-stream-area {
+    height: 28rem;
+  }
+
+  .afternoon-scene {
+    height: 16rem;
+  }
+
+  .sun {
+    width: 4rem;
+    height: 4rem;
+  }
+
+  .keyword-highlight {
+    text-align: center;
+  }
+  
   .timeline-item img {
     width: 4rem !important;
     height: 4rem !important;
@@ -419,13 +647,21 @@ img {
   }
 }
 
-/* 动画性能优化 - 已移至 tailwind.css 全局样式 */
-/* 此处保留为空，避免重复定义 */
+/* ============================================
+   可访问性：尊重用户的动画偏好
+   ============================================ */
 
-/* 性能优化 - 年度歌手展示 */
-.main-artist-image,
-.timeline-item,
-.floating {
-  will-change: transform;
-  backface-visibility: hidden;
-} 
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  /* 保留必要的动画（如加载指示器） */
+  .animate-spin {
+    animation-duration: 1s !important;
+  }
+}
