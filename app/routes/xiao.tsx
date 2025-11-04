@@ -1,9 +1,15 @@
 import type { LinksFunction, MetaFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { useLoaderData, Link } from "@remix-run/react";
-import { useState, useEffect } from "react";
 import { LazyMotion, domAnimation, m } from "framer-motion";
-import { useImageToken, type ImageData } from "~/hooks/useMediaToken.client";
+import { generateImageTokens } from "~/utils/imageToken.server";
+
+// ImageData type
+interface ImageData {
+  id: string | number;
+  src: string;
+  alt?: string;
+}
 
 // Types
 interface XiaoPageData {
@@ -48,17 +54,33 @@ export const meta: MetaFunction = () => [
   { name: "keywords", content: "小岛,哲思,摄影,感悟,思考,独白" },
 ];
 
-// Loader function
+// Loader function - 在服务端批量生成所有图片token
 export async function loader() {
+  // 原始图片数据
+  const rawXiaoImages: ImageData[] = [
+    { id: 1, src: 'Feedback/a.png', alt: '冬日小麦岛的夕阳' },
+    { id: 2, src: 'Feedback/b.png', alt: '秋日风筝' },
+    { id: 3, src: 'Feedback/c.png', alt: '秋日风景' },
+    { id: 4, src: 'Feedback/d.png', alt: '画廊照片 1' },
+    { id: 5, src: 'Feedback/e.jpg', alt: '画廊照片 2' },
+    { id: 6, src: 'Feedback/f.jpg', alt: '画廊照片 3' }
+  ];
+
+  // 收集所有图片路径
+  const allImagePaths = rawXiaoImages.map(img => img.src);
+
+  // 批量生成所有图片token
+  const tokenResults = generateImageTokens(allImagePaths, 30);
+  const tokenMap = new Map(tokenResults.map(result => [result.imageName, result.imageUrl]));
+
+  // 替换所有src为带token的完整URL
+  const xiaoimages = rawXiaoImages.map(img => ({
+    ...img,
+    src: tokenMap.get(img.src) || img.src
+  }));
+
   const data: XiaoPageData = {
-    xiaoimages: [
-      { id: 1, src: 'Feedback/a.png', alt: '冬日小麦岛的夕阳' },
-      { id: 2, src: 'Feedback/b.png', alt: '秋日风筝' },
-      { id: 3, src: 'Feedback/c.png', alt: '秋日风景' },
-      { id: 4, src: 'Feedback/d.png', alt: '画廊照片 1' },
-      { id: 5, src: 'Feedback/e.jpg', alt: '画廊照片 2' },
-      { id: 6, src: 'Feedback/f.jpg', alt: '画廊照片 3' }
-    ],
+    xiaoimages,
     content: {
       title: "一切",
       subtitle: "照片所表达的",
@@ -89,53 +111,13 @@ export async function loader() {
 
   return json(data, {
     headers: {
-      "Cache-Control": "public, max-age=600, stale-while-revalidate=1800",
+      "Cache-Control": "public, max-age=300", // token数据缓存5分钟
     },
   });
 }
 
-const createImagePlaceholder = () => 
-  "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OTk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkxvYWRpbmcuLi48L3RleHQ+PC9zdmc+";
-
 export default function XiaoPage() {
   const { xiaoimages, content } = useLoaderData<typeof loader>();
-  
-  const {
-    initializeImageUrls,
-    handleImageError,
-    clearImageErrorStates,
-    getCacheStats,
-    cacheSize
-  } = useImageToken();
-
-  const [processedImages, setProcessedImages] = useState(xiaoimages);
-  const [isInitializing, setIsInitializing] = useState(false);
-
-  useEffect(() => {
-    const initializeXiaoImages = async () => {
-      setIsInitializing(true);
-      clearImageErrorStates();
-      
-      try {
-        await initializeImageUrls(xiaoimages, (images) => {
-          setProcessedImages(images);
-        }, '小岛图片');
-      } catch (error) {
-        console.error('小岛图片初始化失败:', error);
-      } finally {
-        setIsInitializing(false);
-      }
-    };
-
-    initializeXiaoImages();
-  }, [xiaoimages, initializeImageUrls, clearImageErrorStates]);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const stats = getCacheStats();
-      console.log('📊 小岛页面缓存统计:', { ...stats, cacheSize });
-    }
-  }, [getCacheStats, cacheSize]);
 
   return (
     <LazyMotion features={domAnimation}>
@@ -157,14 +139,6 @@ export default function XiaoPage() {
           <div className="w-24 h-px bg-gradient-to-r from-transparent via-amber-500 to-transparent mx-auto"></div>
         </m.div>
 
-        {isInitializing && (
-          <div className="text-center py-8">
-            <div className="inline-flex items-center space-x-2 text-gray-600">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-amber-600"></div>
-              <span>正在加载小岛图片...</span>
-            </div>
-          </div>
-        )}
 
         {/* Section 1: Winter Wheat Island */}
         <m.section 
@@ -184,13 +158,11 @@ export default function XiaoPage() {
             <div className="lg:col-span-4 relative group">
               <div className="relative overflow-hidden rounded-2xl shadow-2xl transition-transform duration-300 group-hover:scale-105">
                 <img 
-                  src={processedImages[0]?.src.includes('token=') ? processedImages[0].src : createImagePlaceholder()}
-                  alt={processedImages[0]?.alt}
-                  data-xiao-id={processedImages[0]?.id}
-                  data-xiao-src={processedImages[0]?.src.includes('token=') ? '' : processedImages[0]?.src}
-                  onError={(e) => handleImageError(e, processedImages[0]?.id)}
+                  src={xiaoimages[0]?.src}
+                  alt={xiaoimages[0]?.alt}
                   className="w-full h-80 object-cover"
                   loading="eager"
+                  onError={(e) => console.error('Image failed to load:', xiaoimages[0]?.src)}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
               </div>
@@ -216,13 +188,11 @@ export default function XiaoPage() {
             <div className="lg:col-span-4 relative group order-2 lg:order-1">
               <div className="relative overflow-hidden rounded-2xl shadow-2xl transition-transform duration-500 group-hover:scale-105">
                 <img 
-                  src={processedImages[1]?.src.includes('token=') ? processedImages[1].src : createImagePlaceholder()}
-                  alt={processedImages[1]?.alt}
-                  data-xiao-id={processedImages[1]?.id}
-                  data-xiao-src={processedImages[1]?.src.includes('token=') ? '' : processedImages[1]?.src}
-                  onError={(e) => handleImageError(e, processedImages[1]?.id)}
+                  src={xiaoimages[1]?.src}
+                  alt={xiaoimages[1]?.alt}
                   className="w-full h-80 object-cover"
                   loading="lazy"
+                  onError={(e) => console.error('Image failed to load:', xiaoimages[1]?.src)}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </div>
@@ -237,13 +207,11 @@ export default function XiaoPage() {
             <div className="lg:col-span-4 relative group order-3">
               <div className="relative overflow-hidden rounded-2xl shadow-2xl transition-transform duration-500 group-hover:scale-105">
                 <img 
-                  src={processedImages[2]?.src.includes('token=') ? processedImages[2].src : createImagePlaceholder()}
-                  alt={processedImages[2]?.alt}
-                  data-xiao-id={processedImages[2]?.id}
-                  data-xiao-src={processedImages[2]?.src.includes('token=') ? '' : processedImages[2]?.src}
-                  onError={(e) => handleImageError(e, processedImages[2]?.id)}
+                  src={xiaoimages[2]?.src}
+                  alt={xiaoimages[2]?.alt}
                   className="w-full h-80 object-cover"
                   loading="lazy"
+                  onError={(e) => console.error('Image failed to load:', xiaoimages[2]?.src)}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </div>
@@ -298,13 +266,11 @@ export default function XiaoPage() {
             <div className="relative group">
               <div className="relative overflow-hidden rounded-3xl shadow-2xl transition-all duration-700 group-hover:scale-105 group-hover:rotate-1">
                 <img 
-                  src={processedImages[3]?.src.includes('token=') ? processedImages[3].src : createImagePlaceholder()}
-                  alt={processedImages[3]?.alt}
-                  data-xiao-id={processedImages[3]?.id}
-                  data-xiao-src={processedImages[3]?.src.includes('token=') ? '' : processedImages[3]?.src}
-                  onError={(e) => handleImageError(e, processedImages[3]?.id)}
+                  src={xiaoimages[3]?.src}
+                  alt={xiaoimages[3]?.alt}
                   className="w-full h-96 object-cover"
                   loading="lazy"
+                  onError={(e) => console.error('Image failed to load:', xiaoimages[3]?.src)}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               </div>
@@ -313,13 +279,11 @@ export default function XiaoPage() {
             <div className="relative group md:-mt-12">
               <div className="relative overflow-hidden rounded-3xl shadow-2xl transition-all duration-700 group-hover:scale-105 group-hover:-rotate-1">
                 <img 
-                  src={processedImages[4]?.src.includes('token=') ? processedImages[4].src : createImagePlaceholder()}
-                  alt={processedImages[4]?.alt}
-                  data-xiao-id={processedImages[4]?.id}
-                  data-xiao-src={processedImages[4]?.src.includes('token=') ? '' : processedImages[4]?.src}
-                  onError={(e) => handleImageError(e, processedImages[4]?.id)}
+                  src={xiaoimages[4]?.src}
+                  alt={xiaoimages[4]?.alt}
                   className="w-full h-96 object-cover"
                   loading="lazy"
+                  onError={(e) => console.error('Image failed to load:', xiaoimages[4]?.src)}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               </div>
@@ -328,13 +292,11 @@ export default function XiaoPage() {
             <div className="relative group">
               <div className="relative overflow-hidden rounded-3xl shadow-2xl transition-all duration-700 group-hover:scale-105 group-hover:rotate-1">
                 <img 
-                  src={processedImages[5]?.src.includes('token=') ? processedImages[5].src : createImagePlaceholder()}
-                  alt={processedImages[5]?.alt}
-                  data-xiao-id={processedImages[5]?.id}
-                  data-xiao-src={processedImages[5]?.src.includes('token=') ? '' : processedImages[5]?.src}
-                  onError={(e) => handleImageError(e, processedImages[5]?.id)}
+                  src={xiaoimages[5]?.src}
+                  alt={xiaoimages[5]?.alt}
                   className="w-full h-96 object-cover"
                   loading="lazy"
+                  onError={(e) => console.error('Image failed to load:', xiaoimages[5]?.src)}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               </div>

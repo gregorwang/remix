@@ -1,10 +1,9 @@
 import type { LinksFunction, MetaFunction, ActionFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { useLoaderData, Link } from "@remix-run/react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { LazyMotion, domAnimation, m } from "framer-motion";
-import { useImageToken } from "~/hooks/useMediaToken.client";
-import { ClientOnly } from "~/components/common/ClientOnly";
+import { generateImageTokens } from "~/utils/imageToken.server";
 
 // Types for photo gallery data
 interface ImageData {
@@ -66,7 +65,7 @@ export async function action({ request }: ActionFunctionArgs) {
   });
 }
 
-// Loader function - 返回原始图片数据，让客户端使用hooks处理token
+// Loader function - 在服务端批量生成所有图片token
 export async function loader() {
 
   // 定义原始图片数据
@@ -127,14 +126,35 @@ export async function loader() {
     }
   ];
 
-    // 返回原始图片数据，让客户端使用hooks处理token
+  // 1. 收集所有图片路径
+  const rawHeroImage = { id: 'hero', src: 'camera/ss.jpg', alt: '2023~2025，青岛之影' };
+  const allImagePaths = [
+    rawHeroImage.src,
+    ...rawPhotoGalleries.flatMap(gallery => gallery.photos.map(photo => photo.src))
+  ];
+
+  // 2. 批量生成所有图片token
+  const tokenResults = generateImageTokens(allImagePaths, 30);
+  const tokenMap = new Map(tokenResults.map(result => [result.imageName, result.imageUrl]));
+
+  // 3. 替换所有src为带token的完整URL
+  const heroImage = {
+    ...rawHeroImage,
+    src: tokenMap.get(rawHeroImage.src) || rawHeroImage.src
+  };
+
+  const photoGalleries = rawPhotoGalleries.map(gallery => ({
+    ...gallery,
+    photos: gallery.photos.map(photo => ({
+      ...photo,
+      src: tokenMap.get(photo.src) || photo.src
+    }))
+  }));
+
+  // 4. 返回数据
   const data: PhotoPageData = {
-    heroImage: {
-      id: 'hero',
-      src: 'camera/ss.jpg', // hero图片也使用OSS路径
-      alt: '2023~2025，青岛之影'
-    },
-    photoGalleries: rawPhotoGalleries, // 原始数据，客户端处理token
+    heroImage,
+    photoGalleries,
     content: {
       heroTitle: "2023~2025，青岛之影",
       authorName: "汪家俊",
@@ -150,157 +170,69 @@ export async function loader() {
 
   return json(data, {
     headers: {
-      "Cache-Control": "public, max-age=3600, stale-while-revalidate=7200", // 原始数据可以长时间缓存
+      "Cache-Control": "public, max-age=300", // token数据缓存5分钟
     },
   });
 }
 
 
 
-// 优化的图片组件 - 使用hooks处理token
+// 优化的图片组件 - 直接使用服务端生成的完整URL
 const OptimizedImage = ({ 
   src, 
   alt, 
-  className, 
   loading = "lazy",
-  imageId,
-  ...props 
+  className = ""
 }: {
   src: string;
   alt: string;
-  className?: string;
   loading?: "lazy" | "eager";
-  imageId?: string | number;
-  'data-photo-id'?: string | number;
+  className?: string;
 }) => {
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const [hasError, setHasError] = useState(false);
-  const [isTokenReady, setIsTokenReady] = useState(false);
-  const [currentSrc, setCurrentSrc] = useState<string>("");
-  const { getImageWithToken, handleImageError } = useImageToken();
-
-  const placeholderSrc = "data:image/svg+xml,%3csvg width='400' height='300' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='%23f3f4f6'/%3e%3ctext x='50%25' y='50%25' font-family='system-ui,sans-serif' font-size='16' fill='%23a3a3a3' text-anchor='middle' dy='.3em'%3e加载中...%3c/text%3e%3c/svg%3e";
-
-  // 处理token获取 - 避免初始渲染时使用相对路径导致404
-  useEffect(() => {
-    // 判断是否需要获取token：相对路径且不包含token
-    const needsToken = src && !src.startsWith('/') && !src.startsWith('http') && !src.includes('token=');
-    
-    // 如果不需要token（已经是完整URL或包含token），直接使用
-    if (!needsToken) {
-      setCurrentSrc(src);
-      setIsTokenReady(true);
-      return;
-    }
-
-    // 需要token的情况，先使用占位符，获取token后再更新
-    setCurrentSrc(placeholderSrc);
-    setIsTokenReady(false);
-    
-    console.log('🔄 开始获取图片token:', src);
-    getImageWithToken(src)
-      .then((tokenUrl) => {
-        console.log('✅ 获取token成功:', src, '->', tokenUrl);
-        setCurrentSrc(tokenUrl);
-        setIsTokenReady(true);
-      })
-      .catch((error) => {
-        console.error('❌ 获取token失败:', src, error);
-        // 即使失败也不要使用原始相对路径，继续使用占位符
-        setHasError(true);
-      });
-  }, [src, getImageWithToken]);
-
-  // 计算实际使用的src
-  const finalSrc = hasError ? placeholderSrc : (isTokenReady ? currentSrc : placeholderSrc);
-
+  const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState(false);
+  
+  // 检查是否包含固定高度类，如果有则让容器填充，否则使用默认 aspectRatio
+  const hasFixedHeight = className.includes('h-') || className.includes('h-full') || className.includes('height');
+  const aspectRatioStyle = hasFixedHeight ? {} : { aspectRatio: '4/3' };
+  
   return (
-    <img
-      src={finalSrc}
-      alt={alt}
-      className={`transition-opacity duration-300 ${
-        imageLoaded && !hasError && isTokenReady ? 'opacity-100' : 'opacity-0'
-      } ${className || ''}`}
-      loading={loading}
-      onLoad={() => {
-        if (isTokenReady) {
-          setImageLoaded(true);
-        }
-      }}
-      onError={(e) => {
-        setHasError(true);
-        setImageLoaded(false);
-        if (imageId) {
-          handleImageError(e, imageId);
-        }
-      }}
-      suppressHydrationWarning={true}
-      {...props}
-    />
+    <div className={`relative overflow-hidden bg-gray-100 ${className}`}>
+      {/* 占位符 */}
+      {!loaded && !error && (
+        <div 
+          className="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-300 animate-pulse"
+          style={aspectRatioStyle}
+        />
+      )}
+      
+      {/* 实际图片 */}
+      <img
+        src={src}
+        alt={alt}
+        loading={loading}
+        decoding="async"
+        className={`w-full h-full object-cover transition-opacity duration-500 ${
+          loaded ? 'opacity-100' : 'opacity-0'
+        }`}
+        style={aspectRatioStyle}
+        onLoad={() => setLoaded(true)}
+        onError={() => {
+          console.error('图片加载失败:', src);
+          setError(true);
+        }}
+      />
+      
+      {/* 错误占位 */}
+      {error && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-200">
+          <span className="text-gray-500">加载失败</span>
+        </div>
+      )}
+    </div>
   );
 };
 
-// 客户端专用画廊组件
-const ClientOnlyGallery = ({ photoGalleries }: { photoGalleries: PhotoGallery[] }) => {
-  useEffect(() => {
-    console.log('📸 Photo gallery client-side initialized with', photoGalleries.length, 'galleries');
-  }, [photoGalleries.length]);
-
-  return (
-    <>
-      {photoGalleries.map((gallery, galleryIndex) => (
-        <m.div
-          key={gallery.id}
-          className={`gallery-section py-16 px-3 text-center ${
-            gallery.id === 'portrait' ? 'bg-gray-50' : ''
-          }`}
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.6, delay: galleryIndex * 0.1 }}
-        >
-          <m.h2 
-            className="text-4xl md:text-5xl font-bold mb-16 text-gray-700 uppercase tracking-wide"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-          >
-            {gallery.name}
-          </m.h2>
-          
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 max-w-7xl mx-auto">
-            {gallery.photos.map((photo, index) => (
-              <m.div
-                key={photo.id}
-                className="grid-item w-full overflow-hidden bg-gray-200 aspect-square"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ 
-                  duration: 0.6, 
-                  delay: index * 0.05,
-                  ease: "easeOut"
-                }}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <OptimizedImage
-                  src={photo.src}
-                  alt={photo.alt || `照片 ${photo.id}`}
-                  className="w-full h-full object-cover transition-all duration-300 hover:scale-105"
-                  loading="lazy"
-                  imageId={photo.id}
-                  data-photo-id={photo.id}
-                />
-              </m.div>
-            ))}
-          </div>
-        </m.div>
-      ))}
-    </>
-  );
-};
 
 // Main photo page component
 function PhotoPage() {
@@ -308,32 +240,27 @@ function PhotoPage() {
 
   return (
     <LazyMotion features={domAnimation}>
-      {/* Hero Image at the very top, with token logic */}
-      <ClientOnly>
-        {() => (
-          <div className="w-full my-0 relative">
-            <OptimizedImage
-              src={heroImage.src}
-              alt={heroImage.alt || "Hero Image"}
-              className="w-full h-96 object-cover object-center rounded-lg shadow-md"
-              loading="eager"
-              imageId={heroImage.id}
-            />
-            {/* 叠加大字标题 */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <span className="text-white text-4xl md:text-6xl font-extrabold drop-shadow-lg select-none">
-                2023-2035，青岛之影
-              </span>
-            </div>
-          </div>
-        )}
-      </ClientOnly>
+      {/* Hero Image at the very top */}
+      <div className="w-full my-0 relative h-96">
+        <OptimizedImage
+          src={heroImage.src}
+          alt={heroImage.alt || "Hero Image"}
+          className="w-full h-full object-cover object-center rounded-lg shadow-md"
+          loading="eager"
+        />
+        {/* 叠加大字标题 */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <span className="text-white text-4xl md:text-6xl font-extrabold drop-shadow-lg select-none">
+            2023-2035，青岛之影
+          </span>
+        </div>
+      </div>
       {/* Content Section */}
       <m.div 
         className="content-area max-w-4xl mx-auto my-16 px-5"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3, duration: 0.6 }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.3, duration: 0.2 }}
       >
         <h2 className="text-4xl font-bold mb-6 text-gray-700">
           {content.authorName}
@@ -348,53 +275,88 @@ function PhotoPage() {
         </div>
       </m.div>
 
-              {/* Dynamic Gallery Sections - Client Only */}
-        <ClientOnly>
-          {() => <ClientOnlyGallery photoGalleries={photoGalleries} />}
-        </ClientOnly>
+      {/* Dynamic Gallery Sections */}
+      {photoGalleries.map((gallery, galleryIndex) => (
+        <m.div
+          key={gallery.id}
+          className={`gallery-section py-16 px-3 text-center ${
+            gallery.id === 'portrait' ? 'bg-gray-50' : ''
+          }`}
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true, margin: "200px" }}
+          transition={{ duration: 0.2, delay: galleryIndex * 0.1 }}
+        >
+          <m.h2 
+            className="text-4xl md:text-5xl font-bold mb-16 text-gray-700 uppercase tracking-wide"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true, margin: "200px" }}
+            transition={{ duration: 0.2, delay: 0.2 }}
+          >
+            {gallery.name}
+          </m.h2>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 max-w-7xl mx-auto">
+            {gallery.photos.map((photo) => (
+              <div
+                key={photo.id}
+                className="group relative overflow-hidden rounded-lg cursor-pointer aspect-square bg-gray-200"
+              >
+                <OptimizedImage
+                  src={photo.src}
+                  alt={photo.alt || `照片 ${photo.id}`}
+                  loading="lazy"
+                  className="h-full transition-transform duration-300 ease-out group-hover:scale-110"
+                />
+              </div>
+            ))}
+          </div>
+        </m.div>
+      ))}
 
       {/* Footer Section */}
       <m.div 
         className="footer-section bg-gradient-to-br from-gray-50 to-gray-100 py-20 px-5 text-center mt-16"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8 }}
+        viewport={{ once: true, margin: "200px" }}
+        transition={{ duration: 0.2 }}
       >
         <div className="footer-content max-w-2xl mx-auto">
           <m.div 
             className="w-16 h-1 bg-gradient-to-r from-gray-700 to-gray-500 mx-auto mb-8 rounded"
             initial={{ width: 0 }}
             whileInView={{ width: 64 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.2 }}
+            viewport={{ once: true, margin: "200px" }}
+            transition={{ duration: 0.2, delay: 0.2 }}
           />
           
           <m.h3 
             className="text-3xl font-bold text-gray-700 mb-5 tracking-wide"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.3 }}
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true, margin: "200px" }}
+            transition={{ duration: 0.2, delay: 0.3 }}
           >
             {content.footer.title}
           </m.h3>
           
           <m.p 
             className="text-lg text-gray-600 leading-8 mb-10 italic"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.4 }}
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true, margin: "200px" }}
+            transition={{ duration: 0.2, delay: 0.4 }}
           >
             {content.footer.description}
           </m.p>
           
           <m.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.5 }}
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true, margin: "200px" }}
+            transition={{ duration: 0.2, delay: 0.5 }}
           >
             <Link
               to="/xiao"
@@ -426,8 +388,8 @@ function PhotoPage() {
         className="text-center py-8"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6 }}
+        viewport={{ once: true, margin: "200px" }}
+        transition={{ duration: 0.2 }}
       >
         <Link
           to="/"

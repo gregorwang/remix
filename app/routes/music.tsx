@@ -3,6 +3,7 @@ import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { Suspense, lazy } from "react";
 import musicStyles from "~/styles/music.css?url";
+import { generateImageTokens } from "~/utils/imageToken.server";
 
 const MusicPageClient = lazy(() => import('~/components/music/MusicPageClient.client'));
 
@@ -16,33 +17,71 @@ export const meta: MetaFunction = () => [
 ];
 
 export async function loader() {
+  // 原始图片数据
+  const rawDnaImages = [
+    { id: 'dd', src: '/SVG/dd.jpg', alt: '梦醒时分 - 梁静茹' },
+    { id: 'i', src: '/SVG/i.jpg', alt: 'Killer Song - 麻枝准' },
+    { id: 'd', src: '/SVG/d.jpg', alt: 'The Ray of Light - Vivienne' },
+    { id: 'a', src: '/SVG/a.jpg', alt: 'Headlight - MONKEY MAJIK' },
+    { id: 'r', src: '/SVG/r.jpg', alt: 'Renaissance - Steve James' },
+    { id: 'u', src: '/SVG/u.jpg', alt: '小满 - 音阙诗听' },
+    { id: 'v', src: '/SVG/v.jpg', alt: 'SLUMP - Stray Kids' },
+    { id: 'bb', src: '/SVG/bb.jpg', alt: 'Phantom - Vivienne' },
+    { id: 'h', src: '/SVG/h.jpg', alt: 'Letting Go - 蔡健雅' },
+    { id: 'm', src: '/SVG/m.jpg', alt: 'Somebody That I Used To - TRONICBOX' },
+    { id: 'y', src: '/SVG/y.jpg', alt: 'rich-man - 林ゆうき' }
+  ];
+  const rawMusicImages = [
+    { id: 'h', src: '/SVG/h.jpg', alt: 'Letting Go' },
+    { id: 'q', src: '/SVG/q.jpg', alt: '群青' },
+    { id: 'f', src: '/SVG/f.jpg', alt: 'Vivienne' },
+    { id: 'ee', src: '/SVG/ee.jpg', alt: '四季音色' },
+    { id: 'o', src: '/SVG/o.jpg', alt: 'FELT' },
+  ];
+  const rawAlbums = [
+    { id: 1, src: '/SVG/n.jpg', alt: 'FELT Album 1 Cover' },
+    { id: 2, src: '/SVG/t.jpg', alt: 'FELT Album 2 Cover' },
+    { id: 3, src: '/SVG/w.jpg', alt: 'FELT Album 3 Cover' },
+    { id: 4, src: '/SVG/g.jpg', alt: 'FELT Album 4 Cover' }
+  ];
+
+  // 收集所有图片路径（去重，因为有些图片被重复使用）
+  const allImagePaths = [
+    ...rawDnaImages.map(img => img.src),
+    ...rawMusicImages.map(img => img.src),
+    ...rawAlbums.map(img => img.src),
+  ];
+  const uniqueImagePaths = [...new Set(allImagePaths)];
+
+  // 批量生成所有图片token
+  const tokenResults = generateImageTokens(uniqueImagePaths, 30);
+  
+  // 创建tokenMap：使用规范化后的路径作为key（因为generateImageToken已经规范化了）
+  const tokenMap = new Map(tokenResults.map(result => [result.imageName, result.imageUrl]));
+  
+  // 辅助函数：规范化路径（去掉前导斜杠），与generateImageToken的逻辑一致
+  const normalizePath = (path: string) => path.replace(/^\/+/, '');
+
+  // 替换所有src为带token的完整URL（查找时使用规范化路径）
+  const initialDnaImages = rawDnaImages.map(img => ({
+    ...img,
+    src: tokenMap.get(normalizePath(img.src)) || img.src
+  }));
+
+  const initialMusicImages = rawMusicImages.map(img => ({
+    ...img,
+    src: tokenMap.get(normalizePath(img.src)) || img.src
+  }));
+
+  const initialAlbums = rawAlbums.map(img => ({
+    ...img,
+    src: tokenMap.get(normalizePath(img.src)) || img.src
+  }));
+
   const data = {
-    initialDnaImages: [
-      { id: 'dd', src: '/SVG/dd.jpg', alt: '梦醒时分 - 梁静茹' },
-      { id: 'i', src: '/SVG/i.jpg', alt: 'Killer Song - 麻枝准' },
-      { id: 'd', src: '/SVG/d.jpg', alt: 'The Ray of Light - Vivienne' },
-      { id: 'a', src: '/SVG/a.jpg', alt: 'Headlight - MONKEY MAJIK' },
-      { id: 'r', src: '/SVG/r.jpg', alt: 'Renaissance - Steve James' },
-      { id: 'u', src: '/SVG/u.jpg', alt: '小满 - 音阙诗听' },
-      { id: 'v', src: '/SVG/v.jpg', alt: 'SLUMP - Stray Kids' },
-      { id: 'bb', src: '/SVG/bb.jpg', alt: 'Phantom - Vivienne' },
-      { id: 'h', src: '/SVG/h.jpg', alt: 'Letting Go - 蔡健雅' },
-      { id: 'm', src: '/SVG/m.jpg', alt: 'Somebody That I Used To - TRONICBOX' },
-      { id: 'y', src: '/SVG/y.jpg', alt: 'rich-man - 林ゆうき' }
-    ],
-    initialMusicImages: [
-      { id: 'h', src: '/SVG/h.jpg', alt: 'Letting Go' },
-      { id: 'q', src: '/SVG/q.jpg', alt: '群青' },
-      { id: 'f', src: '/SVG/f.jpg', alt: 'Vivienne' },
-      { id: 'ee', src: '/SVG/ee.jpg', alt: '四季音色' },
-      { id: 'o', src: '/SVG/o.jpg', alt: 'FELT' },
-    ],
-    initialAlbums: [
-      { id: 1, src: '/SVG/n.jpg', alt: 'FELT Album 1 Cover' },
-      { id: 2, src: '/SVG/t.jpg', alt: 'FELT Album 2 Cover' },
-      { id: 3, src: '/SVG/w.jpg', alt: 'FELT Album 3 Cover' },
-      { id: 4, src: '/SVG/g.jpg', alt: 'FELT Album 4 Cover' }
-    ],
+    initialDnaImages,
+    initialMusicImages,
+    initialAlbums,
     selectedLyricsData: [
         { text: "我是离开，无名的人啊，我敬你一杯酒，敬你的沉默和每一声怒吼", song: "孙楠/陈楚生《无名之辈》" },
         { text: "I will never gonna leave you never wanna lose you，we'll make it in the end", song: "前島麻由《longshot》" },
@@ -83,7 +122,7 @@ export async function loader() {
   };
   return json(data, {
     headers: {
-      "Cache-Control": "public, max-age=60, s-maxage=600, stale-while-revalidate=30000"
+      "Cache-Control": "public, max-age=300", // token数据缓存5分钟
     }
   });
 }

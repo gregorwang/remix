@@ -1,18 +1,22 @@
-import { useState, useEffect, useRef } from 'react';
-import { useImageToken, type ImageData } from '~/hooks/useMediaToken.client';
+import { useRef } from 'react';
 import { useMusicAnimations } from '~/hooks/useMusicAnimations.client';
 import type { loader } from '~/routes/music';
 import type { SerializeFrom } from '@remix-run/node';
 
+// ImageData type
+interface ImageData {
+  id: string | number;
+  src: string;
+  alt?: string;
+}
+
 type LoaderData = SerializeFrom<typeof loader>;
 
 export default function MusicPageClient(loaderData: LoaderData) {
-    const { initializeImageUrls, handleImageError } = useImageToken();
-
-    const [dnaImages, setDnaImages] = useState<ImageData[]>(loaderData.initialDnaImages);
-    const [musicImages, setMusicImages] = useState<ImageData[]>(loaderData.initialMusicImages);
-    const [albums, setAlbums] = useState<ImageData[]>(loaderData.initialAlbums);
-    const [isInitialized, setIsInitialized] = useState(false);
+    const dnaImages = loaderData.initialDnaImages;
+    const musicImages = loaderData.initialMusicImages;
+    const albums = loaderData.initialAlbums;
+    const isInitialized = true; // 服务端已初始化，直接设为true
 
     // Refs for animated elements
     const scrollIndicator = useRef<HTMLDivElement>(null);
@@ -83,25 +87,8 @@ export default function MusicPageClient(loaderData: LoaderData) {
     
     const getImageSrc = (id: string | number, imageList: ImageData[]) => {
         const image = imageList.find(img => img.id === id);
-        if (image && image.src.includes('token=')) {
-            return image.src;
-        }
-        return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OTk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkxvYWRpbmcuLi48L3RleHQ+PC9zdmc+';
+        return image?.src || '';
     };
-
-    useEffect(() => {
-        const init = async () => {
-            await Promise.all([
-                initializeImageUrls(dnaImages, setDnaImages, 'DNA'),
-                initializeImageUrls(musicImages, setMusicImages, 'Music'),
-                initializeImageUrls(albums, setAlbums, 'Album')
-            ]);
-            setIsInitialized(true);
-        };
-        
-        init();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
 
     return (
         <div className="starfield-bg text-white overflow-x-hidden relative">
@@ -206,7 +193,7 @@ export default function MusicPageClient(loaderData: LoaderData) {
                                        <p className="text-purple-100 text-lg">梁静茹</p>
                                    </div>
                                    <div className="mt-4 md:mt-0 md:ml-8">
-                                       <img src={getImageSrc('dd', dnaImages)} alt="梦醒时分 - 梁静茹" onError={(e) => handleImageError(e as React.SyntheticEvent<HTMLImageElement, Event>, 'dd')} className="w-20 h-20 rounded-xl shadow-lg transform-gpu" loading="lazy" decoding="async" />
+                                       <img src={getImageSrc('dd', dnaImages)} alt="梦醒时分 - 梁静茹" onError={() => console.error('Image failed to load:', getImageSrc('dd', dnaImages))} className="w-20 h-20 rounded-xl shadow-lg transform-gpu" loading="lazy" decoding="async" />
                                    </div>
                                </div>
                            </div>
@@ -221,7 +208,7 @@ export default function MusicPageClient(loaderData: LoaderData) {
                                        <p className="text-indigo-100 text-lg">麻枝准/やなぎなぎ</p>
                                    </div>
                                    <div className="mt-4 md:mt-0 md:ml-8">
-                                       <img src={getImageSrc('i', dnaImages)} alt="Killer Song - 麻枝准" onError={(e) => handleImageError(e as React.SyntheticEvent<HTMLImageElement, Event>, 'i')} className="w-20 h-20 rounded-xl shadow-lg transform-gpu" loading="lazy" decoding="async" />
+                                       <img src={getImageSrc('i', dnaImages)} alt="Killer Song - 麻枝准" onError={() => console.error('Image failed to load:', getImageSrc('i', dnaImages))} className="w-20 h-20 rounded-xl shadow-lg transform-gpu" loading="lazy" decoding="async" />
                                    </div>
                                </div>
                            </div>
@@ -236,7 +223,7 @@ export default function MusicPageClient(loaderData: LoaderData) {
                                        <p className="text-blue-100 text-lg">Vivienne</p>
                                    </div>
                                    <div className="mt-4 md:mt-0 md:ml-8">
-                                       <img src={getImageSrc('d', dnaImages)} alt="The Ray of Light - Vivienne" onError={(e) => handleImageError(e as React.SyntheticEvent<HTMLImageElement, Event>, 'd')} className="w-20 h-20 rounded-xl shadow-lg transform-gpu" loading="lazy" decoding="async" />
+                                       <img src={getImageSrc('d', dnaImages)} alt="The Ray of Light - Vivienne" onError={() => console.error('Image failed to load:', getImageSrc('d', dnaImages))} className="w-20 h-20 rounded-xl shadow-lg transform-gpu" loading="lazy" decoding="async" />
                                    </div>
                                </div>
                            </div>
@@ -251,7 +238,7 @@ export default function MusicPageClient(loaderData: LoaderData) {
                                        <p className="text-cyan-100 text-lg">MONKEY MAJIK</p>
                                    </div>
                                    <div className="mt-4 md:mt-0 md:ml-8">
-                                       <img src={getImageSrc('a', dnaImages)} alt="Headlight - MONKEY MAJIK" onError={(e) => handleImageError(e as React.SyntheticEvent<HTMLImageElement, Event>, 'a')} className="w-20 h-20 rounded-xl shadow-lg transform-gpu" loading="lazy" decoding="async" />
+                                       <img src={getImageSrc('a', dnaImages)} alt="Headlight - MONKEY MAJIK" onError={() => console.error('Image failed to load:', getImageSrc('a', dnaImages))} className="w-20 h-20 rounded-xl shadow-lg transform-gpu" loading="lazy" decoding="async" />
                                    </div>
                                </div>
                            </div>
@@ -266,7 +253,7 @@ export default function MusicPageClient(loaderData: LoaderData) {
                                       <p className="text-teal-100 text-lg">Steve James/Clairity</p>
                                   </div>
                                   <div className="mt-4 md:mt-0 md:ml-8">
-                                      <img src={getImageSrc('r', dnaImages)} alt="Renaissance - Steve James" onError={(e) => handleImageError(e as React.SyntheticEvent<HTMLImageElement, Event>, 'r')} className="w-20 h-20 rounded-xl shadow-lg transform-gpu" loading="lazy" decoding="async" />
+                                      <img src={getImageSrc('r', dnaImages)} alt="Renaissance - Steve James" onError={() => console.error('Image failed to load:', getImageSrc('r', dnaImages))} className="w-20 h-20 rounded-xl shadow-lg transform-gpu" loading="lazy" decoding="async" />
                                   </div>
                               </div>
                            </div>
@@ -281,7 +268,7 @@ export default function MusicPageClient(loaderData: LoaderData) {
                                        <p className="text-pink-100 text-lg">音阙诗听/王梓钰</p>
                                    </div>
                                    <div className="mt-4 md:mt-0 md:ml-8">
-                                       <img src={getImageSrc('u', dnaImages)} alt="小满 - 音阙诗听" onError={(e) => handleImageError(e as React.SyntheticEvent<HTMLImageElement, Event>, 'u')} className="w-20 h-20 rounded-xl shadow-lg transform-gpu" loading="lazy" decoding="async" />
+                                       <img src={getImageSrc('u', dnaImages)} alt="小满 - 音阙诗听" onError={() => console.error('Image failed to load:', getImageSrc('u', dnaImages))} className="w-20 h-20 rounded-xl shadow-lg transform-gpu" loading="lazy" decoding="async" />
                                    </div>
                                </div>
                            </div>
@@ -296,7 +283,7 @@ export default function MusicPageClient(loaderData: LoaderData) {
                                        <p className="text-green-100 text-lg">Stray Kids</p>
                                    </div>
                                    <div className="mt-4 md:mt-0 md:ml-8">
-                                       <img src={getImageSrc('v', dnaImages)} alt="SLUMP - Stray Kids" onError={(e) => handleImageError(e as React.SyntheticEvent<HTMLImageElement, Event>, 'v')} className="w-20 h-20 rounded-xl shadow-lg transform-gpu" loading="lazy" decoding="async" />
+                                       <img src={getImageSrc('v', dnaImages)} alt="SLUMP - Stray Kids" onError={() => console.error('Image failed to load:', getImageSrc('v', dnaImages))} className="w-20 h-20 rounded-xl shadow-lg transform-gpu" loading="lazy" decoding="async" />
                                    </div>
                                </div>
                            </div>
@@ -311,7 +298,7 @@ export default function MusicPageClient(loaderData: LoaderData) {
                                        <p className="text-blue-100 text-lg">Vivienne</p>
                                    </div>
                                    <div className="mt-4 md:mt-0 md:ml-8">
-                                       <img src={getImageSrc('bb', dnaImages)} alt="Phantom - Vivienne" onError={(e) => handleImageError(e as React.SyntheticEvent<HTMLImageElement, Event>, 'bb')} className="w-20 h-20 rounded-xl shadow-lg transform-gpu" loading="lazy" decoding="async" />
+                                       <img src={getImageSrc('bb', dnaImages)} alt="Phantom - Vivienne" onError={() => console.error('Image failed to load:', getImageSrc('bb', dnaImages))} className="w-20 h-20 rounded-xl shadow-lg transform-gpu" loading="lazy" decoding="async" />
                                    </div>
                                </div>
                            </div>
@@ -326,7 +313,7 @@ export default function MusicPageClient(loaderData: LoaderData) {
                                        <p className="text-orange-100 text-lg">蔡健雅</p>
                                    </div>
                                    <div className="mt-4 md:mt-0 md:ml-8">
-                                       <img src={getImageSrc('h', dnaImages)} alt="Letting Go - 蔡健雅" onError={(e) => handleImageError(e as React.SyntheticEvent<HTMLImageElement, Event>, 'h')} className="w-20 h-20 rounded-xl shadow-lg transform-gpu" loading="lazy" decoding="async" />
+                                       <img src={getImageSrc('h', dnaImages)} alt="Letting Go - 蔡健雅" onError={() => console.error('Image failed to load:', getImageSrc('h', dnaImages))} className="w-20 h-20 rounded-xl shadow-lg transform-gpu" loading="lazy" decoding="async" />
                                    </div>
                                </div>
                            </div>
@@ -341,7 +328,7 @@ export default function MusicPageClient(loaderData: LoaderData) {
                                        <p className="text-purple-100 text-lg">TRONICBOX</p>
                                    </div>
                                    <div className="mt-4 md:mt-0 md:ml-8">
-                                       <img src={getImageSrc('m', dnaImages)} alt="Somebody That I Used To - TRONICBOX" onError={(e) => handleImageError(e as React.SyntheticEvent<HTMLImageElement, Event>, 'm')} className="w-20 h-20 rounded-xl shadow-lg transform-gpu" loading="lazy" decoding="async" />
+                                       <img src={getImageSrc('m', dnaImages)} alt="Somebody That I Used To - TRONICBOX" onError={() => console.error('Image failed to load:', getImageSrc('m', dnaImages))} className="w-20 h-20 rounded-xl shadow-lg transform-gpu" loading="lazy" decoding="async" />
                                    </div>
                                </div>
                            </div>
@@ -356,7 +343,7 @@ export default function MusicPageClient(loaderData: LoaderData) {
                                        <p className="text-yellow-100 text-lg">林ゆうき</p>
                                    </div>
                                    <div className="mt-4 md:mt-0 md:ml-8">
-                                       <img src={getImageSrc('y', dnaImages)} alt="rich-man - 林ゆうき" onError={(e) => handleImageError(e as React.SyntheticEvent<HTMLImageElement, Event>, 'y')} className="w-20 h-20 rounded-xl shadow-lg transform-gpu" loading="lazy" decoding="async" />
+                                       <img src={getImageSrc('y', dnaImages)} alt="rich-man - 林ゆうき" onError={() => console.error('Image failed to load:', getImageSrc('y', dnaImages))} className="w-20 h-20 rounded-xl shadow-lg transform-gpu" loading="lazy" decoding="async" />
                                    </div>
                                </div>
                            </div>
@@ -507,7 +494,7 @@ export default function MusicPageClient(loaderData: LoaderData) {
                                             <img
                                                 src={getImageSrc(album.id, albums)}
                                                 alt={album.alt || ''}
-                                                onError={(e) => handleImageError(e as React.SyntheticEvent<HTMLImageElement, Event>, album.id)}
+                                                onError={() => console.error('Image failed to load:', getImageSrc(album.id, albums))}
                                                 className="w-full h-full object-cover rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform-gpu"
                                                 loading="lazy"
                                                 decoding="async"
@@ -541,7 +528,7 @@ export default function MusicPageClient(loaderData: LoaderData) {
                                             <div className="text-base font-black text-white">四季音色</div>
                                         </div>
                                         <div className="w-20 h-20 md:w-25 md:h-25 rounded-full overflow-hidden shadow-lg border-2 border-white/40">
-                                            <img src={getImageSrc('ee', musicImages)} alt="四季音色" onError={(e) => handleImageError(e as React.SyntheticEvent<HTMLImageElement, Event>, 'ee')} className="w-full h-full object-cover transition-transform duration-300 hover:scale-110" loading="lazy" decoding="async" />
+                                            <img src={getImageSrc('ee', musicImages)} alt="四季音色" onError={() => console.error('Image failed to load:', getImageSrc('ee', musicImages))} className="w-full h-full object-cover transition-transform duration-300 hover:scale-110" loading="lazy" decoding="async" />
                                         </div>
                                     </div>
                                 </div>
@@ -553,7 +540,7 @@ export default function MusicPageClient(loaderData: LoaderData) {
                                             <div className="text-base font-black text-white">Vivienne</div>
                                         </div>
                                         <div className="w-20 h-20 md:w-25 md:h-25 rounded-full overflow-hidden shadow-lg border-2 border-white/40">
-                                            <img src={getImageSrc('f', musicImages)} alt="Vivienne 2022" onError={(e) => handleImageError(e as React.SyntheticEvent<HTMLImageElement, Event>, 'f-2022')} className="w-full h-full object-cover transition-transform duration-300 hover:scale-110" loading="lazy" decoding="async" />
+                                            <img src={getImageSrc('f', musicImages)} alt="Vivienne 2022" onError={() => console.error('Image failed to load:', getImageSrc('f', musicImages))} className="w-full h-full object-cover transition-transform duration-300 hover:scale-110" loading="lazy" decoding="async" />
                                         </div>
                                     </div>
                                 </div>
@@ -568,7 +555,7 @@ export default function MusicPageClient(loaderData: LoaderData) {
                             
                             <div ref={mainArtist} className="mb-8 opacity-0">
                                 <div className="w-32 h-32 md:w-44 md:h-44 rounded-full overflow-hidden shadow-2xl mx-auto mb-6 main-artist-image">
-                                    <img src={getImageSrc('f', musicImages)} alt="Vivienne 2024年度歌手" onError={(e) => handleImageError(e as React.SyntheticEvent<HTMLImageElement, Event>, 'f-main')} className="w-full h-full object-cover transition-transform duration-500 hover:scale-110 transform-gpu" loading="lazy" decoding="async" fetchPriority="high" />
+                                    <img src={getImageSrc('f', musicImages)} alt="Vivienne 2024年度歌手" onError={() => console.error('Image failed to load:', getImageSrc('f', musicImages))} className="w-full h-full object-cover transition-transform duration-500 hover:scale-110 transform-gpu" loading="lazy" decoding="async" fetchPriority="high" />
                                 </div>
                             </div>
                             
@@ -629,7 +616,7 @@ export default function MusicPageClient(loaderData: LoaderData) {
                                             <div className="text-base font-black text-white">Vivienne</div>
                                         </div>
                                         <div className="w-20 h-20 md:w-25 md:h-25 rounded-full overflow-hidden shadow-lg border-2 border-white/40">
-                                            <img src={getImageSrc('f', musicImages)} alt="Vivienne 2021" onError={(e) => handleImageError(e as React.SyntheticEvent<HTMLImageElement, Event>, 'f-2021')} className="w-full h-full object-cover transition-transform duration-300 hover:scale-110" loading="lazy" decoding="async" />
+                                            <img src={getImageSrc('f', musicImages)} alt="Vivienne 2021" onError={() => console.error('Image failed to load:', getImageSrc('f', musicImages))} className="w-full h-full object-cover transition-transform duration-300 hover:scale-110" loading="lazy" decoding="async" />
                                         </div>
                                     </div>
                                 </div>
@@ -641,7 +628,7 @@ export default function MusicPageClient(loaderData: LoaderData) {
                                             <div className="text-base font-black text-white">FELT</div>
                                         </div>
                                         <div className="w-20 h-20 md:w-25 md:h-25 rounded-full overflow-hidden shadow-lg border-2 border-white/40">
-                                            <img src={getImageSrc('o', musicImages)} alt="FELT 2020" onError={(e) => handleImageError(e as React.SyntheticEvent<HTMLImageElement, Event>, '0')} className="w-full h-full object-cover transition-transform duration-300 hover:scale-110" loading="lazy" decoding="async" />
+                                            <img src={getImageSrc('o', musicImages)} alt="FELT 2020" onError={() => console.error('Image failed to load:', getImageSrc('o', musicImages))} className="w-full h-full object-cover transition-transform duration-300 hover:scale-110" loading="lazy" decoding="async" />
                                         </div>
                                     </div>
                                 </div>
@@ -653,7 +640,7 @@ export default function MusicPageClient(loaderData: LoaderData) {
                                             <div className="text-base font-black text-white">FELT</div>
                                         </div>
                                         <div className="w-20 h-20 md:w-25 md:h-25 rounded-full overflow-hidden shadow-lg border-2 border-white/40">
-                                            <img src={getImageSrc('o', musicImages)} alt="FELT 2019" onError={(e) => handleImageError(e as React.SyntheticEvent<HTMLImageElement, Event>, 'o')} className="w-full h-full object-cover transition-transform duration-300 hover:scale-110" loading="lazy" decoding="async" />
+                                            <img src={getImageSrc('o', musicImages)} alt="FELT 2019" onError={() => console.error('Image failed to load:', getImageSrc('o', musicImages))} className="w-full h-full object-cover transition-transform duration-300 hover:scale-110" loading="lazy" decoding="async" />
                                         </div>
                                     </div>
                                 </div>

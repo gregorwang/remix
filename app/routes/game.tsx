@@ -3,6 +3,7 @@ import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { Suspense, lazy } from "react";
 import gameStyles from "~/styles/game.css?url";
+import { generateImageTokens } from "~/utils/imageToken.server";
 
 // Import the client component using lazy loading for better bundle splitting
 const GamePageClient = lazy(() => import("~/components/game/GamePageClient.client"));
@@ -111,7 +112,7 @@ const allGamesData = {
 type PlatformId = keyof typeof allGamesData;
 const validPlatformIds = Object.keys(allGamesData) as PlatformId[];
 
-// Loader function - 只做I/O操作，纯算法逻辑已提取到utils
+// Loader function - 在服务端批量生成所有图片token
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
   const platformIdParam = url.searchParams.get("platform") || "playstation";
@@ -123,20 +124,45 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   // 使用工具函数进行分页计算 (纯算法逻辑已提取)
   const paginationResult = paginateGames(allGamesData[platformId], currentPage, 8);
 
+  // 收集所有图片路径
+  const allImagePaths = [
+    'game/jkl.jpg', // 头像图片（使用2次）
+    ...paginationResult.paginatedGames.map(game => game.cover),
+    ...followedGames.map(game => game.cover),
+  ];
+
+  // 批量生成所有图片token
+  const tokenResults = generateImageTokens(allImagePaths, 30);
+  const tokenMap = new Map(tokenResults.map(result => [result.imageName, result.imageUrl]));
+
+  // 替换所有游戏封面的src为带token的完整URL
+  const paginatedGames = paginationResult.paginatedGames.map(game => ({
+    ...game,
+    cover: tokenMap.get(game.cover) || game.cover
+  }));
+
+  const followedGamesWithTokens = followedGames.map(game => ({
+    ...game,
+    cover: tokenMap.get(game.cover) || game.cover
+  }));
+
+  const avatarImageUrl = tokenMap.get('game/jkl.jpg') || 'game/jkl.jpg';
+
   const data = {
     userStats,
     platforms,
     platformId,
-    paginatedGames: paginationResult.paginatedGames,
+    paginatedGames,
     totalGames: paginationResult.totalGames,
     totalPages: paginationResult.totalPages,
     currentPage: paginationResult.currentPage,
-    followedGames,
+    followedGames: followedGamesWithTokens,
+    avatarImageUrl, // 传递头像URL给客户端
   };
 
   return json(data, {
     headers: {
-      "Cache-Control": "public, max-age=300, s-maxage=3600, stale-while-revalidate=86400",
+      "Cache-Control": "public, max-age=300", // token数据缓存5分钟
       "Content-Type": "application/json",
     },
   });

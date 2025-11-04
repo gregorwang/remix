@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useMemo } from 'react';
 import type { loader } from '~/routes/game';
-import { useImageToken, type ImageData } from '~/hooks/useMediaToken.client';
-import { Link, useLocation } from '@remix-run/react';
+import { Link } from '@remix-run/react';
 import type { SerializeFrom } from '@remix-run/node';
 import { PlayStationIcon, SwitchIcon, PCIcon } from '~/components/GamePlatformIcons';
 
@@ -22,75 +21,24 @@ const StarIcon = ({ className }: { className: string }) => (
     </svg>
 );
 
-const ImageWithToken = ({
-    originalSrc,
+// 简化的图片组件 - 直接使用服务端生成的完整URL
+const GameImage = ({
+    src,
     alt,
     className,
-    imgId,
-    logName,
     isLazy = false,
 }: {
-    originalSrc: string,
+    src: string,
     alt: string,
     className: string,
-    imgId: string,
-    logName: string,
     isLazy?: boolean
 }) => {
-    const { initializeSingleImageUrl, handleImageError: hookHandleImageError } = useImageToken();
-    const [imageSrc, setImageSrc] = useState('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMzc0MTUxIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk0YTNiOCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkxvYWRpbmcuLi48L3RleHQ+PC9zdmc+');
-    const imgRef = useRef<HTMLImageElement>(null);
-
-    useEffect(() => {
-        let observer: IntersectionObserver;
-
-        const processImage = async () => {
-            const tokenizedUrl = await initializeSingleImageUrl(originalSrc, logName);
-            if(imgRef.current) { // check if component is still mounted
-                setImageSrc(tokenizedUrl);
-            }
-        };
-
-        if (isLazy) {
-            observer = new IntersectionObserver(
-                (entries) => {
-                    entries.forEach((entry) => {
-                        if (entry.isIntersecting) {
-                            processImage();
-                            observer.unobserve(entry.target);
-                        }
-                    });
-                },
-                { rootMargin: '0px 0px 200px 0px' }
-            );
-
-            if (imgRef.current) {
-                observer.observe(imgRef.current);
-            }
-        } else {
-            processImage();
-        }
-
-        return () => {
-            if (observer && imgRef.current) {
-                observer.unobserve(imgRef.current);
-            }
-        };
-    }, [originalSrc, logName, initializeSingleImageUrl, isLazy]);
-
-    const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-        hookHandleImageError(e, imgId);
-    };
-
     return (
         <img
-            ref={imgRef}
-            src={imageSrc}
+            src={src}
             alt={alt}
-            data-cover={originalSrc}
-            data-img-id={imgId}
             className={className}
-            onError={handleImageError}
+            onError={(e) => console.error('Image failed to load:', src)}
             loading={isLazy ? "lazy" : "eager"}
         />
     );
@@ -108,9 +56,8 @@ export default function GamePageClient(data: LoaderData) {
         totalPages,
         currentPage,
         followedGames: initialFollowedGames,
+        avatarImageUrl,
     } = data;
-
-    const location = useLocation();
 
     const currentPlatformData = useMemo(() => {
         return platforms.find(p => p.id === platformId) || platforms[0];
@@ -151,11 +98,9 @@ export default function GamePageClient(data: LoaderData) {
                         {/* Avatar */}
                         <div className="relative group">
                             <div className="absolute -inset-1 bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500 rounded-full blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-pulse"></div>
-                            <ImageWithToken
-                                originalSrc="game/jkl.jpg"
+                            <GameImage
+                                src={avatarImageUrl}
                                 alt="个人头像"
-                                imgId="user-avatar"
-                                logName="User Avatar"
                                 className="relative w-28 h-28 rounded-full border-4 border-white/30 shadow-2xl object-cover transition-transform duration-500 group-hover:scale-110"
                             />
                             <div className="absolute -top-2 -left-2 w-6 h-6 bg-green-500 rounded-full border-2 border-white animate-pulse"></div>
@@ -223,11 +168,9 @@ export default function GamePageClient(data: LoaderData) {
                         </div>
                         <div className="flex flex-col lg:flex-row items-center justify-between relative z-10 space-y-6 lg:space-y-0">
                             <div className="flex items-center space-x-6">
-                                <ImageWithToken
-                                    originalSrc="game/jkl.jpg"
+                                <GameImage
+                                    src={avatarImageUrl}
                                     alt={`${currentPlatformData.name} 头像`}
-                                    imgId="platform-avatar"
-                                    logName="Platform Avatar"
                                     className="w-20 h-20 rounded-full border-4 border-white/50 shadow-xl object-cover"
                                 />
                                 <div>
@@ -272,11 +215,9 @@ export default function GamePageClient(data: LoaderData) {
                                 {/* Cover */}
                                 <div className="relative group/cover flex-shrink-0">
                                     <div className="absolute -inset-1 bg-gradient-to-r from-purple-500 to-cyan-500 rounded-xl blur opacity-0 group-hover:opacity-75 transition duration-500"></div>
-                                    <ImageWithToken
-                                        originalSrc={game.cover}
+                                    <GameImage
+                                        src={game.cover}
                                         alt={game.name}
-                                        imgId={`game-cover-${game.id}`}
-                                        logName={`Game cover for ${game.name}`}
                                         className="relative w-24 h-24 lg:w-32 lg:h-32 rounded-xl object-cover shadow-xl transition-transform duration-500 group-hover:scale-110"
                                         isLazy={true}
                                     />
@@ -411,11 +352,9 @@ export default function GamePageClient(data: LoaderData) {
                         {initialFollowedGames.map(game => (
                             <div key={game.id} className="bg-black/20 backdrop-blur-xl rounded-2xl p-6 hover:bg-black/30 transition-all duration-500 transform hover:scale-105 hover:shadow-2xl group border border-white/10">
                                 <div className="relative overflow-hidden rounded-xl mb-4">
-                                    <ImageWithToken
-                                        originalSrc={game.cover}
+                                    <GameImage
+                                        src={game.cover}
                                         alt={game.name}
-                                        imgId={`followed-game-${game.id}`}
-                                        logName={`Followed game ${game.name}`}
                                         className="w-full h-40 rounded-xl object-cover transition-transform duration-500 group-hover:scale-110"
                                         isLazy={true}
                                     />

@@ -24,6 +24,18 @@ export default function handleRequest(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   loadContext: AppLoadContext
 ) {
+  // 处理 Chrome DevTools 的 .well-known 请求
+  const url = new URL(request.url);
+  if (url.pathname.startsWith('/.well-known/')) {
+    return new Response(JSON.stringify({}), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+        "Cache-Control": "public, max-age=3600",
+      },
+    });
+  }
+
   return isbot(request.headers.get("user-agent") || "")
     ? handleBotRequest(
         request,

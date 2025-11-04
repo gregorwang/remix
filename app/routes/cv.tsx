@@ -3,7 +3,14 @@ import { json } from "@remix-run/node";
 import { useLoaderData, Link } from "@remix-run/react";
 import { useState, useEffect } from "react";
 import { LazyMotion, domAnimation, m } from "framer-motion";
-import { useImageToken, type ImageData } from "~/hooks/useMediaToken.client";
+import { generateImageTokens } from "~/utils/imageToken.server";
+
+// ImageData type
+interface ImageData {
+  id: string | number;
+  src: string;
+  alt?: string;
+}
 // Icon components replaced with emoji for better performance
 const CheckCircleIcon = ({ className }: { className?: string }) => (
   <span className={className} role="img" aria-label="check">✅</span>
@@ -155,10 +162,23 @@ export const meta: MetaFunction = () => [
   { name: "twitter:card", content: "summary_large_image" },
 ];
 
-// Loader function
+// Loader function - 在服务端生成头像token
 export async function loader() {
+  // 原始头像数据
+  const rawAvatarImage = { id: 'cv-avatar', src: 'Feedback/person.png', alt: '汪家俊的照片' };
+
+  // 生成头像token
+  const tokenResults = generateImageTokens([rawAvatarImage.src], 30);
+  const tokenMap = new Map(tokenResults.map(result => [result.imageName, result.imageUrl]));
+
+  // 替换为带token的完整URL
+  const avatarImage = {
+    ...rawAvatarImage,
+    src: tokenMap.get(rawAvatarImage.src) || rawAvatarImage.src
+  };
+
   const data: CVPageData = {
-    avatarImage: { id: 'cv-avatar', src: 'Feedback/person.png', alt: '汪家俊的照片' },
+    avatarImage,
     content: {
       personal: {
         name: "汪家俊",
@@ -241,23 +261,13 @@ export async function loader() {
 
   return json(data, {
     headers: {
-      "Cache-Control": "public, max-age=3600, stale-while-revalidate=7200",
+      "Cache-Control": "public, max-age=300", // token数据缓存5分钟
     },
   });
 }
 
-const createImagePlaceholder = () => 
-  "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMzc0MTUxIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk0YTNiOCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkxvYWRpbmcuLi48L3RleHQ+PC9zdmc+";
-
 export default function CVPage() {
   const { avatarImage, content } = useLoaderData<typeof loader>();
-  
-  // Image token hook
-  const { 
-    handleImageError,
-    getCacheStats,
-    initializeSingleImageUrl
-  } = useImageToken();
 
   // State management - 为RSC准备，最小化客户端状态
   const [animationStage, setAnimationStage] = useState(0);
@@ -272,23 +282,9 @@ export default function CVPage() {
     { name: content.skills.list.chatgpt, progress: 95, level: content.skills.levels.proficient, icon: WrenchScrewdriverIcon }
   ];
 
-  // 头像占位 & 异步替换
-  const [avatarSrc, setAvatarSrc] = useState<string>(createImagePlaceholder());
-
-  useEffect(() => {
-    (async () => {
-      const secure = await initializeSingleImageUrl(avatarImage.src, '个人头像');
-      setAvatarSrc(secure);
-    })();
-  }, [avatarImage, initializeSingleImageUrl]);
-
   // 初始化和清理
   useEffect(() => {
     console.log('🎬 CV页面初始化');
-    
-    // 打印缓存统计信息
-    const stats = getCacheStats();
-    console.log('📊 CV页面缓存统计:', stats);
     
     // 初始动画序列
     const animationSequence = [
@@ -306,7 +302,7 @@ export default function CVPage() {
     return () => {
       console.log('🧹 CV页面清理');
     };
-  }, [getCacheStats, avatarImage]);
+  }, []);
 
   return (
     <LazyMotion features={domAnimation}>
@@ -335,9 +331,9 @@ export default function CVPage() {
               transition={{ duration: 0.6, delay: 0.2 }}
             >
               <img 
-                src={avatarSrc}
+                src={avatarImage.src}
                 alt={content.personal.photo_alt}
-                onError={(e) => handleImageError(e, avatarImage.id)}
+                onError={() => console.error('Image failed to load:', avatarImage.src)}
                 className="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover shadow-lg border-4 border-white"
                 loading="eager"
                 decoding="async"
