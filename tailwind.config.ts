@@ -83,6 +83,9 @@ export default {
         'fade-in': 'fadeIn 600ms cubic-bezier(0.16, 1, 0.3, 1)',
         'slide-down': 'slideDown 600ms cubic-bezier(0.16, 1, 0.3, 1)',
         'scale-in': 'scaleIn 600ms cubic-bezier(0.16, 1, 0.3, 1)',
+        
+        // 歌词滚动动画
+        'scroll-up': 'scrollUp 120s linear infinite',
       },
       keyframes: {
         // 装饰性关键帧（保留原有）
@@ -119,6 +122,10 @@ export default {
         scaleIn: {
           '0%': { opacity: '0', transform: 'scale(0.95)' },
           '100%': { opacity: '1', transform: 'scale(1)' },
+        },
+        scrollUp: {
+          '0%': { transform: 'translateY(0)' },
+          '100%': { transform: 'translateY(-50%)' },
         },
       },
     },

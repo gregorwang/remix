@@ -10,6 +10,7 @@ import Footer from "~/components/ui/foot";
 import ChangelogSection from "~/components/changelog-section";
 import CursorTeamSection from "~/components/photo-section";
 import CtaSection from "~/components/cta-section";
+import TabShowcase from "~/components/tab-showcase";
 import VideoShowcase from "~/components/video-showcase";
 
 export const links: LinksFunction = () => [
@@ -218,6 +219,9 @@ export default function Index() {
         <div className="absolute inset-0 mx-auto pointer-events-none bg-gradient-to-br from-primary-50 via-transparent to-primary-100 opacity-30" />
       </section>
       <main>
+        {/* Tab Showcase Section - Tab 展示区域 */}
+        <TabShowcase />
+        
         {/* Video Showcase Section - 视频展示区域 */}
         <VideoShowcase />
         
