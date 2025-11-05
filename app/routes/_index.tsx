@@ -7,10 +7,10 @@ import styles from "~/styles/index-route.css?url";
 import Header from "~/components/ui/Header";
 import Faq from "~/components/ui/question";
 import Footer from "~/components/ui/foot";
-import CollapsibleMessages from "~/components/messages/CollapsibleMessages";
 import ChangelogSection from "~/components/changelog-section";
 import CursorTeamSection from "~/components/photo-section";
 import CtaSection from "~/components/cta-section";
+import VideoShowcase from "~/components/video-showcase";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: styles },
@@ -218,23 +218,8 @@ export default function Index() {
         <div className="absolute inset-0 mx-auto pointer-events-none bg-gradient-to-br from-primary-50 via-transparent to-primary-100 opacity-30" />
       </section>
       <main>
-        {/* Feature Navigation - 可展开的留言板 */}
-        <section className="py-20 bg-primary-50">
-            <div className="container mx-auto px-6">
-                <div className="text-center mb-16">
-                    <h2 className="text-4xl md:text-5xl font-bold text-primary-950 mb-6">功能导航</h2>
-                    <p className="text-xl text-primary-950/70">
-                        探索网站的各种功能
-                    </p>
-                </div>
-                <div className="max-w-6xl mx-auto">
-                    {/* 可展开的留言板组件 - 完全懒加载 */}
-                    <CollapsibleMessages 
-                        userId={userId ?? null}
-                    />
-                </div>
-            </div>
-        </section>
+        {/* Video Showcase Section - 视频展示区域 */}
+        <VideoShowcase />
         
         {/* Photo Section - 图片区域 */}
         <CursorTeamSection />

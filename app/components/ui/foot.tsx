@@ -1,5 +1,6 @@
-import { Link } from "@remix-run/react"
-import { useState } from "react"
+import { Link, useFetcher, useRouteLoaderData } from "@remix-run/react"
+import { useEffect } from "react"
+import type { loader as rootLoader } from "~/root"
 
 // Icon components
 const SunIcon = ({ className }: { className?: string }) => (
@@ -56,15 +57,25 @@ const footerSections = [
 ]
 
 export default function Footer() {
-  const [theme, setTheme] = useState<"light" | "dark">("light")
-  const [language] = useState("简体中文")
+  const rootData = useRouteLoaderData<typeof rootLoader>("root")
+  const theme = rootData?.theme || "light"
+  const fetcher = useFetcher()
+
+  // 乐观更新 - 立即应用主题到 DOM
+  useEffect(() => {
+    if (fetcher.formData?.get("theme")) {
+      const newTheme = fetcher.formData.get("theme") as "light" | "dark"
+      document.documentElement.classList.remove("light", "dark")
+      document.documentElement.classList.add(newTheme)
+    }
+  }, [fetcher.formData])
 
   const handleThemeChange = (newTheme: "light" | "dark") => {
-    setTheme(newTheme)
-    // 可以在这里添加主题切换逻辑
-    if (typeof document !== "undefined") {
-      document.documentElement.classList.toggle("dark", newTheme === "dark")
-    }
+    // 使用 fetcher 提交到根路由的 action
+    fetcher.submit(
+      { theme: newTheme },
+      { method: "post", action: "/" }
+    )
   }
 
   return (
@@ -148,7 +159,7 @@ export default function Footer() {
               {/* Language Selector */}
               <div className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground cursor-pointer transition-colors">
                 <GlobeIcon className="w-4 h-4" />
-                <span>{language}</span>
+                <span>简体中文</span>
               </div>
             </div>
           </div>

@@ -10,7 +10,7 @@ import {
   useRevalidator,
   json,
 } from "@remix-run/react";
-import type { LinksFunction, LoaderFunctionArgs } from "@remix-run/node";
+import type { LinksFunction, LoaderFunctionArgs, ActionFunctionArgs } from "@remix-run/node";
 import { createBrowserClient } from "@supabase/ssr";
 
 // Removed Clerk imports - now using Supabase only
@@ -18,6 +18,7 @@ import { createBrowserClient } from "@supabase/ssr";
 import { createClient } from "~/utils/supabase.server";
 import type { Database } from "~/lib/types";
 import tailwindStyles from "./tailwind.css?url";
+import { getTheme, setTheme, type Theme } from "~/utils/theme.server";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: tailwindStyles },
@@ -79,24 +80,61 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     userError = authUserError;
   }
 
+  // 获取主题
+  const theme = await getTheme(request);
+
   return json({
     env,
     session,
     user,
     userError,
+    theme,
   }, {
     headers: Object.fromEntries(headers.entries())
   });
 };
 
+// 处理主题切换
+export const action = async ({ request }: ActionFunctionArgs) => {
+  const formData = await request.formData();
+  const theme = formData.get("theme") as Theme;
+
+  if (theme !== "light" && theme !== "dark") {
+    return json({ error: "Invalid theme" }, { status: 400 });
+  }
+
+  return json(
+    { success: true },
+    {
+      headers: {
+        "Set-Cookie": await setTheme(theme),
+      },
+    }
+  );
+};
+
 export function Layout({ children }: { children: React.ReactNode }) {
+  const data = useLoaderData<typeof loader>();
+  const theme = data?.theme || "light";
+  
   return (
-    <html lang="zh-CN">
+    <html lang="zh-CN" className={theme}>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
+        {/* 防止主题闪烁 */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                const theme = document.cookie.match(/theme=([^;]+)/)?.[1] || 'light';
+                document.documentElement.classList.add(theme);
+              })();
+            `,
+          }}
+        />
         {/* Adobe Fonts (思源宋体) */}
         <script
           dangerouslySetInnerHTML={{
