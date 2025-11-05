@@ -203,7 +203,6 @@ export default function Terms() {
   // Client-side state for interactivity (progressive enhancement)
   const [activeSection, setActiveSection] = useState('section-1');
   const [scrollProgress, setScrollProgress] = useState(0);
-  const [isDark, setIsDark] = useState(true);
   const sectionRefs = useRef<(HTMLElement | null)[]>([]);
 
   // Scroll handling (client-side enhancement)
@@ -240,29 +239,18 @@ export default function Terms() {
     if (element) {
       const offset = 100;
       const elementPosition = element.offsetTop - offset;
-      window.scrollTo({ 
+      window.scrollTo({
         top: elementPosition,
         behavior: 'smooth'
       });
     }
   };
 
-  const toggleTheme = () => {
-    setIsDark(!isDark);
-  };
-
   return (
     <LazyMotion features={domAnimation}>
     <div className="min-h-screen bg-primary-50 relative overflow-hidden">
-      {/* Dynamic background effects */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-0 -left-4 w-72 h-72 bg-accent/20 rounded-full mix-blend-multiply filter blur-xl animate-blob"></div>
-        <div className="absolute top-0 -right-4 w-72 h-72 bg-accent/15 rounded-full mix-blend-multiply filter blur-xl animate-blob" style={{ animationDelay: '2s' }}></div>
-        <div className="absolute -bottom-8 left-20 w-72 h-72 bg-accent/25 rounded-full mix-blend-multiply filter blur-xl animate-blob" style={{ animationDelay: '4s' }}></div>
-      </div>
-
-      {/* Grid background */}
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=60 height=60 viewBox=0 0 60 60 xmlns=http://www.w3.org/2000/svg%3E%3Cg fill=none fill-rule=evenodd%3E%3Cg fill=%23d97757 fill-opacity=0.03%3E%3Ccircle cx=30 cy=30 r=1/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')]"></div>
+      {/* Subtle background gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary-100/30 via-transparent to-accent/5"></div>
 
       {/* Header */}
       <header className="relative z-10 pt-20 pb-16">
@@ -273,12 +261,9 @@ export default function Terms() {
             transition={{ duration: 0.8 }}
             className="inline-block"
           >
-            <div className="relative">
-              <h1 className="text-6xl md:text-7xl font-black text-primary-950 mb-4 tracking-tight">
-                使用条款
-              </h1>
-              <div className="absolute -inset-1 bg-accent/20 rounded-lg blur opacity-25 group-hover:opacity-75 transition duration-1000"></div>
-            </div>
+            <h1 className="text-5xl md:text-6xl font-bold text-primary-950 mb-4 tracking-tight">
+              使用条款与免责声明
+            </h1>
           </m.div>
           
           <m.div
@@ -292,10 +277,6 @@ export default function Terms() {
               <span className="text-primary-950 font-medium">生效日期：{effectiveDate}</span>
             </div>
           </m.div>
-
-          {/* Decorative elements */}
-          <div className="absolute top-10 left-10 w-20 h-20 border border-accent/20 rounded-full animate-spin-slow"></div>
-          <div className="absolute top-32 right-20 w-16 h-16 border border-accent/20 rounded-full animate-bounce-slow"></div>
         </div>
       </header>
 
@@ -423,10 +404,9 @@ export default function Terms() {
           initial={{ opacity: 0, scale: 0 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, delay: 1 }}
-          className="group relative w-14 h-14 bg-accent text-white rounded-2xl shadow-2xl hover:shadow-accent/25 transform hover:scale-110 transition-all duration-300"
+          className="group relative w-14 h-14 bg-accent text-white rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
           aria-label="返回顶部"
         >
-          <div className="absolute -inset-1 bg-accent-hover rounded-2xl blur opacity-30 group-hover:opacity-75 transition duration-300"></div>
           <div className="relative flex items-center justify-center h-full">
             <svg className="w-6 h-6 transform group-hover:-translate-y-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 15l7-7 7 7" />
@@ -434,38 +414,16 @@ export default function Terms() {
           </div>
         </m.button>
 
-        {/* Theme toggle button */}
-        <m.button
-          onClick={toggleTheme}
-          initial={{ opacity: 0, scale: 0 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: 1.2 }}
-          className="group relative w-14 h-14 bg-primary-100 backdrop-blur-sm text-primary-950 rounded-2xl border border-primary-100/50 shadow-2xl hover:bg-primary-100/80 transform hover:scale-110 transition-all duration-300"
-          aria-label="切换主题"
-        >
-          <div className="relative flex items-center justify-center h-full">
-            {!isDark ? (
-              <svg className="w-6 h-6 transform group-hover:rotate-180 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-              </svg>
-            ) : (
-              <svg className="w-6 h-6 transform group-hover:rotate-180 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-              </svg>
-            )}
-          </div>
-        </m.button>
-
         {/* Back to home link */}
         <m.div
           initial={{ opacity: 0, scale: 0 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: 1.4 }}
+          transition={{ duration: 0.5, delay: 1.2 }}
         >
           <Link
             to="/"
             prefetch="intent"
-            className="group relative w-14 h-14 bg-primary-100 backdrop-blur-sm text-primary-950 rounded-2xl border border-primary-100/50 shadow-2xl hover:bg-primary-100/80 transform hover:scale-110 transition-all duration-300 flex items-center justify-center"
+            className="group relative w-14 h-14 bg-primary-100 backdrop-blur-sm text-primary-950 rounded-2xl border border-primary-100/50 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center justify-center"
             aria-label="返回首页"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
