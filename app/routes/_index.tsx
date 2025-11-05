@@ -8,6 +8,9 @@ import Header from "~/components/ui/Header";
 import Faq from "~/components/ui/question";
 import Footer from "~/components/ui/foot";
 import CollapsibleMessages from "~/components/messages/CollapsibleMessages";
+import ChangelogSection from "~/components/changelog-section";
+import CursorTeamSection from "~/components/photo-section";
+import CtaSection from "~/components/cta-section";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: styles },
@@ -232,6 +235,19 @@ export default function Index() {
                 </div>
             </div>
         </section>
+        
+        {/* Photo Section - 图片区域 */}
+        <CursorTeamSection />
+        
+        {/* Changelog Section - 更新日志 */}
+        <section className="py-20 bg-white">
+            <div className="container mx-auto px-6">
+                <ChangelogSection />
+            </div>
+        </section>
+        
+        {/* CTA Section - 留言板区域 */}
+        <CtaSection userId={userId ?? null} />
       </main>
       <Faq />
       <Footer />
