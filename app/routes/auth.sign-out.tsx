@@ -1,24 +1,23 @@
 import { type ActionFunctionArgs, redirect } from "@remix-run/node";
-import { createClient } from "~/utils/supabase.server";
+import { auth } from "~/lib/auth.server";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-    const { supabase, headers } = createClient(request);
+  // Better Auth 登出
+  await auth.api.signOut({
+    headers: request.headers,
+  });
 
-  await supabase.auth.signOut();
-
-  // 登出操作不应该被缓存
-  headers.set("Cache-Control", "no-cache, no-store, must-revalidate");
-  headers.set("Pragma", "no-cache");
-  headers.set("Expires", "0");
-
-  // Redirect to the homepage, ensuring the auth cookie is cleared.
+  // 重定向到首页
   return redirect("/", {
-    headers: Object.fromEntries(headers.entries()),
+    headers: {
+      "Cache-Control": "no-cache, no-store, must-revalidate",
+      "Pragma": "no-cache",
+      "Expires": "0",
+    },
   });
 };
 
-// This is a resource route, so it doesn't need a default export.
-// It only exists to handle the POST request for signing out.
+// 资源路由，不需要UI
 export default function SignOutRoute() {
   return null;
-} 
+}
